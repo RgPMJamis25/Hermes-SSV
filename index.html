@@ -1,0 +1,1021 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-slate-950 text-slate-100">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HERMES SSV Progress Tracker (T8)</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: { 50: '#f0f7ff', 500: '#3b82f6', 600: '#2563eb', 900: '#1e3a8a' },
+                        status: { green: '#2ecc71', yellow: '#ffc107', red: '#ff0000', blue: '#5d9cec', orange: '#ff8c00', purple: '#a855f7' }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Plotly.js for interactive charts -->
+    <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+
+    <!-- PapaParse for Google Sheets CSV parsing -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
+        .chart-card {
+            background: rgba(30, 41, 59, 0.75);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .js-plotly-plot .plotly .modebar {
+            top: 5px !important;
+            right: 5px !important;
+        }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #0f172a; }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+    </style>
+</head>
+<body class="h-full flex flex-col font-sans antialiased bg-slate-950 text-slate-100 selection:bg-blue-500 selection:text-white">
+
+    <header class="border-b border-slate-800 bg-slate-900/90 backdrop-blur sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="p-2 bg-blue-600/20 text-blue-400 rounded-xl border border-blue-500/30">
+                    <i data-lucide="activity" class="w-6 h-6"></i>
+                </div>
+                <div>
+                    <h1 class="font-bold text-lg text-white leading-tight">HERMES SSV Progress Tracker (T8)</h1>
+                    <p class="text-xs text-slate-400 flex items-center gap-2">
+                        <span>Sheet: <strong class="text-slate-300">Sheet1</strong></span>
+                        <span class="inline-block w-1 h-1 rounded-full bg-slate-600"></span>
+                        <span id="sync-status" class="text-emerald-400 flex items-center gap-1">
+                            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Connecting...
+                        </span>
+                    </p>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-3">
+                <button onclick="toggleShareModal()" class="px-3 py-2 text-xs font-semibold bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg transition flex items-center gap-2 shadow-sm">
+                    <i data-lucide="share-2" class="w-3.5 h-3.5"></i> Share Dashboard
+                </button>
+                <button id="refresh-btn" onclick="fetchData(true)" class="px-3 py-2 text-xs font-medium bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg border border-slate-700 transition flex items-center gap-2">
+                    <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i> Sync Data
+                </button>
+                <a href="https://docs.google.com/spreadsheets/d/15owO_lt9EltLfAVh5CEfOObWBGqR_HsT0GnzmRFpc6I/edit?gid=0#gid=0" target="_blank" class="px-3 py-2 text-xs font-medium bg-blue-600 hover:bg-blue-500 text-white rounded-lg transition flex items-center gap-2">
+                    <i data-lucide="external-link" class="w-3.5 h-3.5"></i> Open Live Sheet
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+
+        <div class="chart-card p-4 rounded-2xl flex flex-wrap items-center justify-between gap-4">
+            <div class="flex flex-wrap items-center gap-3 w-full lg:w-auto">
+                <div class="flex items-center gap-2">
+                    <i data-lucide="filter" class="w-4 h-4 text-slate-400"></i>
+                    <span class="text-xs font-semibold uppercase tracking-wider text-slate-400">Global Filters:</span>
+                </div>
+
+                <select id="granularity-filter" onchange="applyFilters()" class="bg-blue-950 text-xs font-bold text-blue-300 border border-blue-700/60 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none">
+                    <option value="DAILY">Daily Timeline</option>
+                    <option value="WEEKLY">Weekly Aggregation (Mon-Sun)</option>
+                    <option value="MONTHLY">Monthly Aggregation (Month End)</option>
+                </select>
+
+                <select id="category-filter" onchange="applyFilters()" class="bg-slate-900 text-xs text-slate-200 border border-slate-700 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none">
+                    <option value="ALL">All Categories</option>
+                </select>
+
+                <select id="province-filter" onchange="applyFilters()" class="bg-slate-900 text-xs text-slate-200 border border-slate-700 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none">
+                    <option value="ALL">All Provinces</option>
+                </select>
+
+                <select id="town-filter" onchange="applyFilters()" class="bg-slate-900 text-xs text-slate-200 border border-slate-700 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none">
+                    <option value="ALL">All Towns / Cities</option>
+                </select>
+
+                <select id="tech-filter" onchange="applyFilters()" class="bg-slate-900 text-xs text-slate-200 border border-slate-700 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none">
+                    <option value="ALL">All Technologies</option>
+                </select>
+
+                <select id="band-filter" onchange="applyFilters()" class="bg-slate-900 text-xs text-slate-200 border border-slate-700 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none">
+                    <option value="ALL">All Bands</option>
+                </select>
+            </div>
+
+            <div class="text-xs text-slate-400 flex items-center gap-2">
+                <span>Logical Sites Reference:</span>
+                <span class="px-2 py-1 bg-slate-900 border border-slate-800 rounded font-mono text-blue-400">Column: Lookup</span>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-7 gap-3">
+            <div class="chart-card p-4 rounded-2xl border-l-4 border-l-blue-500 flex flex-col justify-between">
+                <div class="flex items-center justify-between text-slate-400 text-xs font-semibold">
+                    <span>TOTAL LOGICAL SITES</span>
+                    <i data-lucide="layers" class="w-4 h-4 text-blue-500"></i>
+                </div>
+                <div id="kpi-total" class="text-2xl font-black text-blue-400 mt-2">0</div>
+                <div class="text-[10px] text-slate-400 mt-2">Unique Lookup Entries</div>
+            </div>
+
+            <div class="chart-card p-4 rounded-2xl border-l-4 border-l-emerald-500 flex flex-col justify-between">
+                <div class="flex items-center justify-between text-slate-400 text-xs font-semibold">
+                    <span>SSV APPROVED</span>
+                    <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-500"></i>
+                </div>
+                <div id="kpi-approved" class="text-2xl font-black text-emerald-400 mt-2">0</div>
+                <div id="kpi-approved-pct" class="text-[10px] text-emerald-400/80 font-semibold mt-2">0% of total</div>
+            </div>
+
+            <div class="chart-card p-4 rounded-2xl border-l-4 border-l-sky-500 flex flex-col justify-between">
+                <div class="flex items-center justify-between text-slate-400 text-xs font-semibold">
+                    <span>FOR GT REVIEW</span>
+                    <i data-lucide="clock" class="w-4 h-4 text-sky-400"></i>
+                </div>
+                <div id="kpi-gt-review" class="text-2xl font-black text-sky-300 mt-2">0</div>
+                <div id="kpi-gt-pct" class="text-[10px] text-sky-300/80 font-semibold mt-2">For Review: 0 | Re-submit: 0</div>
+            </div>
+
+            <div class="chart-card p-4 rounded-2xl border-l-4 border-l-amber-500 flex flex-col justify-between">
+                <div class="flex items-center justify-between text-slate-400 text-xs font-semibold">
+                    <span>ONGOING WITHIN SLA</span>
+                    <i data-lucide="alert-triangle" class="w-4 h-4 text-amber-400"></i>
+                </div>
+                <div id="kpi-within-sla" class="text-2xl font-black text-amber-400 mt-2">0</div>
+                <div class="text-[10px] text-amber-400/80 font-semibold mt-2">&le; 21 Days from TRFS</div>
+            </div>
+
+            <div class="chart-card p-4 rounded-2xl border-l-4 border-l-red-500 flex flex-col justify-between">
+                <div class="flex items-center justify-between text-slate-400 text-xs font-semibold">
+                    <span>ONGOING BEYOND SLA</span>
+                    <i data-lucide="alert-circle" class="w-4 h-4 text-red-500"></i>
+                </div>
+                <div id="kpi-beyond-sla" class="text-2xl font-black text-red-400 mt-2">0</div>
+                <div class="text-[10px] text-red-400/80 font-semibold mt-2">&gt; 21 Days from TRFS</div>
+            </div>
+
+            <div class="chart-card p-4 rounded-2xl border-l-4 border-l-orange-500 flex flex-col justify-between">
+                <div class="flex items-center justify-between text-slate-400 text-xs font-semibold">
+                    <span>REJECTED / REVISION</span>
+                    <i data-lucide="x-circle" class="w-4 h-4 text-orange-400"></i>
+                </div>
+                <div id="kpi-rejected" class="text-2xl font-black text-orange-400 mt-2">0</div>
+                <div class="text-[10px] text-orange-400/80 font-semibold mt-2">Requires Re-submission</div>
+            </div>
+
+            <div class="chart-card p-4 rounded-2xl border-l-4 border-l-purple-500 flex flex-col justify-between">
+                <div class="flex items-center justify-between text-slate-400 text-xs font-semibold">
+                    <span>NOT YET TRFS</span>
+                    <i data-lucide="calendar-clock" class="w-4 h-4 text-purple-400"></i>
+                </div>
+                <div id="kpi-not-trfs" class="text-2xl font-black text-purple-300 mt-2">0</div>
+                <div class="text-[10px] text-purple-300/80 font-semibold mt-2">Pending Cutover / TRFS</div>
+            </div>
+        </div>
+
+        <div class="chart-card p-5 rounded-2xl space-y-3">
+            <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+                <div>
+                    <h2 class="font-bold text-base text-slate-100 flex items-center gap-2">
+                        <i data-lucide="bar-chart-3" class="w-5 h-5 text-blue-400"></i>
+                        HERMES SSV PROGRESS (T8)
+                    </h2>
+                    <p class="text-xs text-slate-400">Stacked Bar Chart | Evaluated by latest milestone per logical site</p>
+                </div>
+            </div>
+            <div id="ssv-progress-chart" class="w-full h-80"></div>
+        </div>
+
+        <div class="chart-card p-5 rounded-2xl space-y-4">
+            <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-800 pb-3">
+                <div>
+                    <h2 class="font-bold text-base text-slate-100 flex items-center gap-2">
+                        <i data-lucide="calendar-clock" class="w-5 h-5 text-purple-400"></i>
+                        NOT YET TRFS AGING FROM SWAP / CUTOVER DATE
+                    </h2>
+                    <p class="text-xs text-slate-400">Elapsed time from Swap Date to Chart Snapshot Date for non-TRFS sites</p>
+                </div>
+
+                <!-- Logical Site / Unique PLAID Toggle Control -->
+                <div class="flex items-center bg-slate-900 border border-slate-800 p-1 rounded-xl text-xs">
+                    <button id="toggle-not-trfs-logical" onclick="setNotTrfsViewMode('LOGICAL')" class="px-3 py-1.5 rounded-lg font-semibold text-white bg-purple-600 transition flex items-center gap-1.5 shadow-sm">
+                        <i data-lucide="layers" class="w-3.5 h-3.5"></i> Logical Sites
+                    </button>
+                    <button id="toggle-not-trfs-plaid" onclick="setNotTrfsViewMode('PLAID')" class="px-3 py-1.5 rounded-lg font-semibold text-slate-400 hover:text-white transition flex items-center gap-1.5">
+                        <i data-lucide="map-pin" class="w-3.5 h-3.5"></i> Unique PLAID
+                    </button>
+                </div>
+            </div>
+
+            <!-- Milestone Aging KPI Cards -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+                <div class="bg-slate-900/80 p-3.5 rounded-xl border-l-4 border-l-purple-500 border border-slate-800/80 flex items-center justify-between">
+                    <div>
+                        <div class="text-[11px] font-semibold text-slate-400 uppercase tracking-wide">Total Not Yet TRFS</div>
+                        <div id="kpi-aging-total" class="text-xl font-black text-purple-300 mt-1">0</div>
+                    </div>
+                    <div class="p-2 bg-purple-500/10 text-purple-400 rounded-lg">
+                        <i data-lucide="calendar-clock" class="w-5 h-5"></i>
+                    </div>
+                </div>
+
+                <div class="bg-slate-900/80 p-3.5 rounded-xl border-l-4 border-l-emerald-500 border border-slate-800/80 flex items-center justify-between">
+                    <div>
+                        <div class="text-[11px] font-semibold text-slate-400 uppercase tracking-wide">Within 2 Days</div>
+                        <div id="kpi-aging-u2" class="text-xl font-black text-emerald-400 mt-1">0</div>
+                    </div>
+                    <div class="p-2 bg-emerald-500/10 text-emerald-400 rounded-lg">
+                        <i data-lucide="clock-2" class="w-5 h-5"></i>
+                    </div>
+                </div>
+
+                <div class="bg-slate-900/80 p-3.5 rounded-xl border-l-4 border-l-amber-500 border border-slate-800/80 flex items-center justify-between">
+                    <div>
+                        <div class="text-[11px] font-semibold text-slate-400 uppercase tracking-wide">2 - 10 Days</div>
+                        <div id="kpi-aging-2-10" class="text-xl font-black text-amber-400 mt-1">0</div>
+                    </div>
+                    <div class="p-2 bg-amber-500/10 text-amber-400 rounded-lg">
+                        <i data-lucide="clock-4" class="w-5 h-5"></i>
+                    </div>
+                </div>
+
+                <div class="bg-slate-900/80 p-3.5 rounded-xl border-l-4 border-l-orange-500 border border-slate-800/80 flex items-center justify-between">
+                    <div>
+                        <div class="text-[11px] font-semibold text-slate-400 uppercase tracking-wide">10 - 20 Days</div>
+                        <div id="kpi-aging-10-20" class="text-xl font-black text-orange-400 mt-1">0</div>
+                    </div>
+                    <div class="p-2 bg-orange-500/10 text-orange-400 rounded-lg">
+                        <i data-lucide="clock-8" class="w-5 h-5"></i>
+                    </div>
+                </div>
+
+                <div class="bg-slate-900/80 p-3.5 rounded-xl border-l-4 border-l-red-500 border border-slate-800/80 flex items-center justify-between">
+                    <div>
+                        <div class="text-[11px] font-semibold text-slate-400 uppercase tracking-wide">Beyond 20 Days</div>
+                        <div id="kpi-aging-b20" class="text-xl font-black text-red-400 mt-1">0</div>
+                    </div>
+                    <div class="p-2 bg-red-500/10 text-red-400 rounded-lg">
+                        <i data-lucide="alert-octagon" class="w-5 h-5"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div id="not-trfs-aging-chart" class="w-full h-80"></div>
+        </div>
+
+        <div class="chart-card p-5 rounded-2xl space-y-4">
+            <div class="flex flex-wrap items-center justify-between gap-4 border-b border-slate-800 pb-4">
+                <div>
+                    <h2 class="font-bold text-lg text-slate-100 flex items-center gap-2">
+                        <i data-lucide="database" class="w-5 h-5 text-blue-400"></i>
+                        Logical Site Milestone Master Records
+                    </h2>
+                    <p class="text-xs text-slate-400 mt-0.5">Filterable table showing all individual site entries and milestone dates</p>
+                </div>
+                <div class="flex items-center gap-3">
+                    <input type="text" id="table-search" oninput="renderTable()" placeholder="Search PLAID, site name, or status..." class="bg-slate-900 border border-slate-700 text-xs rounded-lg px-3 py-2 text-slate-200 outline-none focus:ring-2 focus:ring-blue-500 w-64">
+                    <button onclick="exportTableCSV()" class="px-3 py-2 text-xs font-semibold bg-blue-600 hover:bg-blue-500 text-white rounded-lg transition flex items-center gap-2">
+                        <i data-lucide="download" class="w-3.5 h-3.5"></i> Export CSV
+                    </button>
+                </div>
+            </div>
+
+            <div class="overflow-x-auto max-h-[500px] rounded-xl border border-slate-800">
+                <table class="w-full text-left text-xs text-slate-300">
+                    <thead class="bg-slate-900 text-slate-400 sticky top-0 uppercase tracking-wider font-semibold border-b border-slate-800">
+                        <tr>
+                            <th class="p-3 w-12 text-center">#</th>
+                            <th class="p-3 text-blue-400">Lookup Ref</th>
+                            <th class="p-3">PLAID</th>
+                            <th class="p-3">Category</th>
+                            <th class="p-3">Site Name</th>
+                            <th class="p-3">Province</th>
+                            <th class="p-3">Tech</th>
+                            <th class="p-3">Band</th>
+                            <th class="p-3 text-slate-400">Swap Date</th>
+                            <th class="p-3 text-blue-400">TRFS Date</th>
+                            <th class="p-3 text-amber-400">Date Submitted</th>
+                            <th class="p-3 text-purple-300">Approval Status</th>
+                            <th class="p-3 text-emerald-400">Date Approved</th>
+                        </tr>
+                    </thead>
+                    <tbody id="master-table-body" class="divide-y divide-slate-800/60 bg-slate-950/40"></tbody>
+                </table>
+            </div>
+
+            <div id="table-pagination" class="flex items-center justify-between text-xs text-slate-400 pt-1"></div>
+        </div>
+
+    </main>
+
+    <div id="share-modal" class="fixed inset-0 z-50 hidden bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="chart-card max-w-lg w-full p-6 rounded-2xl border border-slate-700 shadow-2xl space-y-5 relative">
+            <button onclick="toggleShareModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white p-1 rounded-lg">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+
+            <div class="flex items-center gap-3">
+                <div class="p-3 bg-indigo-600/20 text-indigo-400 rounded-xl border border-indigo-500/30">
+                    <i data-lucide="share-2" class="w-6 h-6"></i>
+                </div>
+                <div>
+                    <h3 class="font-bold text-lg text-white">Share Dashboard Link</h3>
+                    <p class="text-xs text-slate-400">Collaborate with colleagues on local network or web</p>
+                </div>
+            </div>
+
+            <div class="space-y-4 text-xs">
+                <div>
+                    <label class="block font-semibold text-slate-300 mb-1.5">1. Local Network / Wi-Fi Link</label>
+                    <div class="flex items-center gap-2">
+                        <input id="share-lan-url" type="text" readonly class="bg-slate-950 border border-slate-700 text-slate-200 rounded-lg px-3 py-2 w-full font-mono">
+                        <button onclick="copyShareInput('share-lan-url', this)" class="px-3 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg font-semibold shrink-0">Copy</button>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block font-semibold text-slate-300 mb-1.5">2. Current Browser URL</label>
+                    <div class="flex items-center gap-2">
+                        <input id="share-browser-url" type="text" readonly class="bg-slate-950 border border-slate-700 text-slate-200 rounded-lg px-3 py-2 w-full font-mono">
+                        <button onclick="copyShareInput('share-browser-url', this)" class="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded-lg font-semibold shrink-0">Copy</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_PROXY_URL = '/api/sheet-data';
+        const SHEET_ID = '15owO_lt9EltLfAVh5CEfOObWBGqR_HsT0GnzmRFpc6I';
+        const SHEET_NAME = 'Sheet1';
+
+        const PRIMARY_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&sheet=${encodeURIComponent(SHEET_NAME)}`;
+        const GVIZ_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(SHEET_NAME)}`;
+        const CORS_PROXY = `https://api.allorigins.win/raw?url=${encodeURIComponent(PRIMARY_URL)}`;
+
+        let rawDataset = [];
+        let filteredDataset = [];
+        let tablePage = 1;
+        const PAGE_SIZE = 50;
+        let notTrfsViewMode = 'LOGICAL';
+
+        window.addEventListener('DOMContentLoaded', () => {
+            try {
+                if (window.lucide && typeof lucide.createIcons === 'function') {
+                    lucide.createIcons();
+                }
+            } catch (e) {}
+
+            const lanInput = document.getElementById('share-lan-url');
+            if (lanInput) lanInput.value = `http://192.168.254.103:8080`;
+            const browserInput = document.getElementById('share-browser-url');
+            if (browserInput) browserInput.value = window.location.href;
+
+            fetchData();
+        });
+
+        function toggleShareModal() {
+            const modal = document.getElementById('share-modal');
+            if (modal) modal.classList.toggle('hidden');
+        }
+
+        function copyShareInput(inputId, btn) {
+            const input = document.getElementById(inputId);
+            if (!input) return;
+            input.select();
+            input.setSelectionRange(0, 99999);
+            try {
+                navigator.clipboard.writeText(input.value);
+            } catch(e) {
+                document.execCommand('copy');
+            }
+            if (btn) {
+                const origText = btn.innerText;
+                btn.innerText = 'Copied!';
+                setTimeout(() => { btn.innerText = origText; }, 2000);
+            }
+        }
+
+        function setNotTrfsViewMode(mode) {
+            notTrfsViewMode = mode;
+            const btnLogical = document.getElementById('toggle-not-trfs-logical');
+            const btnPlaid = document.getElementById('toggle-not-trfs-plaid');
+            if (btnLogical && btnPlaid) {
+                if (mode === 'LOGICAL') {
+                    btnLogical.className = 'px-3 py-1.5 rounded-lg font-semibold text-white bg-purple-600 transition flex items-center gap-1.5 shadow-sm';
+                    btnPlaid.className = 'px-3 py-1.5 rounded-lg font-semibold text-slate-400 hover:text-white transition flex items-center gap-1.5';
+                } else {
+                    btnPlaid.className = 'px-3 py-1.5 rounded-lg font-semibold text-white bg-purple-600 transition flex items-center gap-1.5 shadow-sm';
+                    btnLogical.className = 'px-3 py-1.5 rounded-lg font-semibold text-slate-400 hover:text-white transition flex items-center gap-1.5';
+                }
+            }
+            updateKPIs();
+            renderCharts();
+        }
+
+        function getNotTrfsAgingCounts(dataset, snapshotDate, mode) {
+            let u2 = 0, d2_10 = 0, d10_20 = 0, b20 = 0;
+            const notTrfsAll = dataset.filter(d => categorizeRecord(d) === 'NOT_YET_TRFS');
+
+            let totalNotTrfs = 0;
+
+            if (mode === 'PLAID') {
+                const plaidSet = new Set(notTrfsAll.map(d => d.PLAID).filter(p => p && p !== 'N/A'));
+                totalNotTrfs = plaidSet.size;
+
+                const plaidMap = new Map();
+                notTrfsAll.forEach(d => {
+                    if (!d.PLAID || d.PLAID === 'N/A') return;
+                    const existing = plaidMap.get(d.PLAID);
+                    if (!existing || (d.SwapDate && (!existing.SwapDate || d.SwapDate < existing.SwapDate))) {
+                        plaidMap.set(d.PLAID, d);
+                    }
+                });
+
+                plaidMap.forEach(d => {
+                    if (d.SwapDate && d.SwapDate <= snapshotDate) {
+                        const elapsed = Math.floor((snapshotDate - d.SwapDate) / (1000 * 60 * 60 * 24));
+                        if (elapsed <= 2) u2++;
+                        else if (elapsed <= 10) d2_10++;
+                        else if (elapsed <= 20) d10_20++;
+                        else b20++;
+                    }
+                });
+            } else {
+                totalNotTrfs = notTrfsAll.length;
+
+                notTrfsAll.forEach(d => {
+                    if (d.SwapDate && d.SwapDate <= snapshotDate) {
+                        const elapsed = Math.floor((snapshotDate - d.SwapDate) / (1000 * 60 * 60 * 24));
+                        if (elapsed <= 2) u2++;
+                        else if (elapsed <= 10) d2_10++;
+                        else if (elapsed <= 20) d10_20++;
+                        else b20++;
+                    }
+                });
+            }
+            return { totalNotTrfs, u2, d2_10, d10_20, b20 };
+        }
+
+        function clean(val) {
+            if (val === null || val === undefined) return '';
+            return String(val)
+                .replace(/["'\u201C\u201D\u2018\u2019\\]/g, '')
+                .replace(/[\u200B-\u200D\uFEFF]/g, '')
+                .trim();
+        }
+
+        function parseDate(val) {
+            const str = clean(val);
+            if (!str) return null;
+
+            let dt = new Date(str);
+            if (!isNaN(dt.getTime())) return dt;
+
+            const parts = str.split(/[\/\-\s]+/);
+            if (parts.length === 3) {
+                let p1 = parseInt(parts[0], 10);
+                let p2 = parseInt(parts[1], 10);
+                let p3 = parseInt(parts[2], 10);
+
+                if (parts[0].length === 4) {
+                    dt = new Date(p1, p2 - 1, p3);
+                    if (!isNaN(dt.getTime())) return dt;
+                }
+
+                if (p3 < 100) p3 += 2000;
+
+                if (p1 > 12) {
+                    dt = new Date(p3, p2 - 1, p1);
+                } else {
+                    dt = new Date(p3, p1 - 1, p2);
+                }
+                if (!isNaN(dt.getTime())) return dt;
+            }
+            return null;
+        }
+
+        function formatDate(dt) {
+            if (!dt || !(dt instanceof Date) || isNaN(dt.getTime())) return '--';
+            const m = dt.getMonth() + 1;
+            const d = dt.getDate();
+            const y = dt.getFullYear();
+            return `${m}/${d}/${y}`;
+        }
+
+        async function fetchData(forceRefresh = false) {
+            const syncStatus = document.getElementById('sync-status');
+            if (syncStatus) {
+                syncStatus.innerHTML = '<span class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span> Syncing Sheet...';
+                syncStatus.className = 'text-amber-400 flex items-center gap-1';
+            }
+
+            const endpoints = [API_PROXY_URL, PRIMARY_URL, GVIZ_URL, CORS_PROXY];
+
+            for (const url of endpoints) {
+                try {
+                    const controller = new AbortController();
+                    const timeoutId = setTimeout(() => controller.abort(), 8000);
+                    const res = await fetch(url, { signal: controller.signal }).catch(() => null);
+                    clearTimeout(timeoutId);
+
+                    if (res && res.ok) {
+                        const csvText = await res.text();
+                        if (csvText && csvText.length > 50 && !csvText.includes('<!DOCTYPE html>')) {
+                            if (window.Papa) {
+                                Papa.parse(csvText, {
+                                    header: false,
+                                    skipEmptyLines: 'greedy',
+                                    complete: function(results) {
+                                        if (results.data && results.data.length > 0) {
+                                            if (syncStatus) {
+                                                syncStatus.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Synced ${results.data.length.toLocaleString()} Rows`;
+                                                syncStatus.className = 'text-emerald-400 flex items-center gap-1';
+                                            }
+                                            processParsedData(results.data);
+                                        }
+                                    }
+                                });
+                            }
+                            return;
+                        }
+                    }
+                } catch (e) {}
+            }
+
+            if (syncStatus) {
+                syncStatus.innerHTML = '<span class="w-2 h-2 rounded-full bg-red-500"></span> Sync Failed / Offline';
+                syncStatus.className = 'text-red-400 flex items-center gap-1';
+            }
+        }
+
+        function processParsedData(dataRows) {
+            if (!dataRows || !Array.isArray(dataRows) || dataRows.length === 0) return;
+
+            let headerIdx = -1;
+            for (let r = 0; r < Math.min(15, dataRows.length); r++) {
+                const row = (dataRows[r] || []).map(c => clean(c).toUpperCase());
+                if (row.some(c => c === 'PLAID' || c === 'LOOKUP' || c === 'SWAP DATE' || c === 'TRFS DATE' || c === 'APPROVAL STATUS')) {
+                    headerIdx = r;
+                    break;
+                }
+            }
+
+            if (headerIdx === -1) headerIdx = 0;
+            const hRow = (dataRows[headerIdx] || []).map(c => clean(c).toUpperCase());
+
+            const findCol = (terms) => hRow.findIndex(c => terms.some(t => c === t || c.includes(t)));
+
+            const colCategory = findCol(['CATEGORY', 'CAT']);
+            const colLookup = findCol(['LOOKUP', 'LOOK_UP']);
+            const colPlaid = findCol(['PLAID', 'PLA_ID']);
+            const colSite = findCol(['SITENAME', 'SITE NAME']);
+            const colProv = findCol(['PROVINCE', 'PROV']);
+            const colTown = findCol(['TOWN', 'CITY']);
+            const colTech = findCol(['TECHNOLOGY', 'TECH']);
+            const colBand = findCol(['BAND']);
+            const colSwap = findCol(['SWAP DATE', 'SWAP_DATE']);
+            const colTRFS = findCol(['TRFS DATE', 'TRFS_DATE']);
+            const colSubmitted = findCol(['DATE SUBMITTED', 'DATE_SUBMITTED']);
+            const colStatus = findCol(['APPROVAL STATUS', 'STATUS']);
+            const colRej1 = findCol(['1ST REJECTION DATE']);
+            const colResub1 = findCol(['1ST RE-SUBMISSION DATE']);
+            const colRej2 = findCol(['2ND REJECTION DATE']);
+            const colResub2 = findCol(['2ND RE-SUBMISSION DATE']);
+            const colApproved = findCol(['DATE APPROVED']);
+
+            rawDataset = [];
+
+            for (let i = headerIdx + 1; i < dataRows.length; i++) {
+                const r = dataRows[i];
+                if (!r || r.length === 0) continue;
+
+                const plaid = clean(r[colPlaid]);
+                let lookupVal = clean(r[colLookup]);
+
+                if (!plaid && !lookupVal) continue;
+                if (plaid.toUpperCase() === 'PLAID' || lookupVal.toUpperCase() === 'LOOKUP') continue;
+
+                if (!lookupVal) {
+                    lookupVal = `${plaid}_${clean(r[colBand])}`;
+                }
+
+                rawDataset.push({
+                    Lookup: lookupVal,
+                    PLAID: plaid || 'N/A',
+                    Category: clean(r[colCategory]).toUpperCase() || 'UNSPECIFIED',
+                    SiteName: clean(r[colSite]),
+                    Province: clean(r[colProv]).toUpperCase() || 'UNSPECIFIED',
+                    Town: clean(r[colTown]).toUpperCase() || 'UNSPECIFIED',
+                    Tech: clean(r[colTech]).toUpperCase() || 'UNSPECIFIED',
+                    Band: clean(r[colBand]).toUpperCase() || 'UNSPECIFIED',
+                    SwapDate: parseDate(r[colSwap]),
+                    TRFSDate: parseDate(r[colTRFS]),
+                    DateSubmitted: parseDate(r[colSubmitted]),
+                    ApprovalStatus: clean(r[colStatus]),
+                    Rejection1Date: parseDate(r[colRej1]),
+                    Resubmission1Date: parseDate(r[colResub1]),
+                    Rejection2Date: parseDate(r[colRej2]),
+                    Resubmission2Date: parseDate(r[colResub2]),
+                    DateApproved: parseDate(r[colApproved])
+                });
+            }
+
+            populateDropdowns();
+            applyFilters();
+        }
+
+        function populateDropdowns() {
+            const categories = ['ALL', ...new Set(rawDataset.map(d => d.Category))].sort();
+            const provinces = ['ALL', ...new Set(rawDataset.map(d => d.Province))].sort();
+            const towns = ['ALL', ...new Set(rawDataset.map(d => d.Town))].sort();
+            const techs = ['ALL', ...new Set(rawDataset.map(d => d.Tech))].sort();
+            const bands = ['ALL', ...new Set(rawDataset.map(d => d.Band))].sort();
+
+            document.getElementById('category-filter').innerHTML = categories.map(c => `<option value="${c}">${c === 'ALL' ? 'All Categories' : c}</option>`).join('');
+            document.getElementById('province-filter').innerHTML = provinces.map(p => `<option value="${p}">${p === 'ALL' ? 'All Provinces' : p}</option>`).join('');
+            document.getElementById('town-filter').innerHTML = towns.map(t => `<option value="${t}">${t === 'ALL' ? 'All Towns / Cities' : t}</option>`).join('');
+            document.getElementById('tech-filter').innerHTML = techs.map(t => `<option value="${t}">${t === 'ALL' ? 'All Technologies' : t}</option>`).join('');
+            document.getElementById('band-filter').innerHTML = bands.map(b => `<option value="${b}">${b === 'ALL' ? 'All Bands' : b}</option>`).join('');
+        }
+
+        function categorizeRecord(d) {
+            const rawSt = (d.ApprovalStatus || '').toUpperCase().trim();
+
+            if (rawSt.includes('NOT YET TRFS') || rawSt.includes('NOT TRFS') || rawSt === 'PENDING TRFS' || rawSt === 'NOT YET CUTOVER') {
+                return 'NOT_YET_TRFS';
+            }
+
+            if (rawSt === 'APPROVED' || rawSt.includes('APPROV') || (d.DateApproved && !rawSt.includes('REJECT'))) {
+                return 'APPROVED';
+            }
+
+            if (rawSt.includes('REJECT') || rawSt.includes('REVISION')) {
+                return 'REJECTED';
+            }
+
+            const isResubmit = rawSt.includes('RE-SUBMIT') || rawSt.includes('RESUBMIT') || rawSt.includes('RE-SUBMISSION') || rawSt.includes('RESUBMISSION');
+            const isForReview = rawSt.includes('FOR REVIEW') || rawSt.includes('SUBMIT') || rawSt.includes('REVIEW');
+
+            if (isResubmit) return 'RE_SUBMIT';
+            if (isForReview) return 'FOR_REVIEW';
+
+            if (rawSt.includes('ONGOING') || rawSt === 'TRFS' || rawSt.includes('SSV') || d.TRFSDate) {
+                const now = new Date();
+                const trfs = d.TRFSDate || now;
+                const days = Math.floor((now - trfs) / (1000 * 60 * 60 * 24));
+                return days <= 21 ? 'ONGOING_WITHIN_SLA' : 'ONGOING_BEYOND_SLA';
+            }
+
+            return 'ONGOING_WITHIN_SLA';
+        }
+
+        function applyFilters() {
+            const selCat = document.getElementById('category-filter').value;
+            const selProv = document.getElementById('province-filter').value;
+            const selTown = document.getElementById('town-filter').value;
+            const selTech = document.getElementById('tech-filter').value;
+            const selBand = document.getElementById('band-filter').value;
+            const searchQuery = (document.getElementById('table-search')?.value || '').toLowerCase().trim();
+
+            filteredDataset = rawDataset.filter(d => {
+                if (selCat !== 'ALL' && d.Category !== selCat) return false;
+                if (selProv !== 'ALL' && d.Province !== selProv) return false;
+                if (selTown !== 'ALL' && d.Town !== selTown) return false;
+                if (selTech !== 'ALL' && d.Tech !== selTech) return false;
+                if (selBand !== 'ALL' && d.Band !== selBand) return false;
+
+                if (searchQuery) {
+                    const matchText = `${d.Lookup} ${d.PLAID} ${d.Category} ${d.SiteName} ${d.Province} ${d.Town} ${d.ApprovalStatus}`.toLowerCase();
+                    if (!matchText.includes(searchQuery)) return false;
+                }
+                return true;
+            });
+
+            updateKPIs();
+            renderCharts();
+            renderTable();
+        }
+
+        function updateKPIs() {
+            const total = filteredDataset.length;
+
+            let approved = 0, forReview = 0, reSubmit = 0, rejected = 0, withinSLA = 0, beyondSLA = 0, notYetTRFS = 0;
+            const now = new Date();
+
+            filteredDataset.forEach(d => {
+                const cat = categorizeRecord(d);
+                if (cat === 'APPROVED') approved++;
+                else if (cat === 'FOR_REVIEW') forReview++;
+                else if (cat === 'RE_SUBMIT') reSubmit++;
+                else if (cat === 'REJECTED') rejected++;
+                else if (cat === 'ONGOING_WITHIN_SLA') withinSLA++;
+                else if (cat === 'ONGOING_BEYOND_SLA') beyondSLA++;
+                else if (cat === 'NOT_YET_TRFS') notYetTRFS++;
+            });
+
+            const gtReview = forReview + reSubmit;
+
+            if (document.getElementById('kpi-total')) document.getElementById('kpi-total').innerText = total.toLocaleString();
+
+            if (document.getElementById('kpi-approved')) document.getElementById('kpi-approved').innerText = approved.toLocaleString();
+            if (document.getElementById('kpi-approved-pct')) document.getElementById('kpi-approved-pct').innerText = total > 0 ? `${((approved / total) * 100).toFixed(1)}% of total` : '0%';
+
+            if (document.getElementById('kpi-gt-review')) document.getElementById('kpi-gt-review').innerText = gtReview.toLocaleString();
+            if (document.getElementById('kpi-gt-pct')) document.getElementById('kpi-gt-pct').innerText = `For Review: ${forReview} | Re-submit: ${reSubmit}`;
+
+            if (document.getElementById('kpi-within-sla')) document.getElementById('kpi-within-sla').innerText = withinSLA.toLocaleString();
+            if (document.getElementById('kpi-beyond-sla')) document.getElementById('kpi-beyond-sla').innerText = beyondSLA.toLocaleString();
+
+            if (document.getElementById('kpi-rejected')) document.getElementById('kpi-rejected').innerText = rejected.toLocaleString();
+
+            if (document.getElementById('kpi-not-trfs')) {
+                document.getElementById('kpi-not-trfs').innerText = notYetTRFS.toLocaleString();
+            }
+
+            const agingCounts = getNotTrfsAgingCounts(filteredDataset, now, notTrfsViewMode);
+            if (document.getElementById('kpi-aging-total')) document.getElementById('kpi-aging-total').innerText = agingCounts.totalNotTrfs.toLocaleString();
+            if (document.getElementById('kpi-aging-u2')) document.getElementById('kpi-aging-u2').innerText = agingCounts.u2.toLocaleString();
+            if (document.getElementById('kpi-aging-2-10')) document.getElementById('kpi-aging-2-10').innerText = agingCounts.d2_10.toLocaleString();
+            if (document.getElementById('kpi-aging-10-20')) document.getElementById('kpi-aging-10-20').innerText = agingCounts.d10_20.toLocaleString();
+            if (document.getElementById('kpi-aging-b20')) document.getElementById('kpi-aging-b20').innerText = agingCounts.b20.toLocaleString();
+        }
+
+        function buildTimeline(minTime, maxTime, granularity) {
+            const dayMs = 24 * 60 * 60 * 1000;
+            let timeline = [];
+
+            if (granularity === 'WEEKLY') {
+                let curr = new Date(minTime);
+                let day = curr.getDay();
+                let diffToMon = (day === 0 ? -6 : 1 - day);
+                curr.setDate(curr.getDate() + diffToMon);
+
+                while (curr.getTime() <= maxTime) {
+                    let sunday = new Date(curr);
+                    sunday.setDate(sunday.getDate() + 6);
+                    let snapshotDate = sunday.getTime() > maxTime ? new Date(maxTime) : sunday;
+                    timeline.push(snapshotDate);
+                    curr.setDate(curr.getDate() + 7);
+                }
+            } else if (granularity === 'MONTHLY') {
+                let curr = new Date(minTime);
+                curr.setDate(1);
+
+                while (curr.getTime() <= maxTime) {
+                    let monthEnd = new Date(curr.getFullYear(), curr.getMonth() + 1, 0);
+                    let snapshotDate = monthEnd.getTime() > maxTime ? new Date(maxTime) : monthEnd;
+                    timeline.push(snapshotDate);
+                    curr.setMonth(curr.getMonth() + 1);
+                }
+            } else {
+                for (let t = minTime; t <= maxTime; t += dayMs) {
+                    timeline.push(new Date(t));
+                }
+            }
+
+            let uniqueMap = new Map();
+            timeline.forEach(d => uniqueMap.set(formatDate(d), d));
+            return Array.from(uniqueMap.values());
+        }
+
+        function renderCharts() {
+            if (!window.Plotly || filteredDataset.length === 0) return;
+
+            let dates = [];
+            filteredDataset.forEach(d => {
+                if (d.SwapDate) dates.push(d.SwapDate.getTime());
+                if (d.TRFSDate) dates.push(d.TRFSDate.getTime());
+            });
+
+            if (dates.length === 0) return;
+
+            const minTime = Math.min(...dates);
+            const maxTime = Math.max(...dates, new Date().getTime());
+            const granularity = document.getElementById('granularity-filter')?.value || 'DAILY';
+
+            const timeline = buildTimeline(minTime, maxTime, granularity);
+            const dayMs = 24 * 60 * 60 * 1000;
+
+            let ssvData = { withinSLA: [], beyondSLA: [], gtReview: [], rejected: [], approved: [] };
+            let agingData = { u2: [], d2_10: [], d10_20: [], b20: [] };
+
+            timeline.forEach(currDate => {
+                let withinCount = 0, beyondCount = 0, gtCount = 0, rejCount = 0, appCount = 0;
+
+                filteredDataset.forEach(d => {
+                    const cat = categorizeRecord(d);
+                    const isNotTRFS = (cat === 'NOT_YET_TRFS');
+
+                    if (!isNotTRFS) {
+                        if (d.TRFSDate && d.TRFSDate <= currDate) {
+                            const ms = {
+                                Approved: d.DateApproved,
+                                Resub2: d.Resubmission2Date,
+                                Rej2: d.Rejection2Date,
+                                Resub1: d.Resubmission1Date,
+                                Rej1: d.Rejection1Date,
+                                Submitted: d.DateSubmitted,
+                                TRFS: d.TRFSDate
+                            };
+
+                            let validMs = {};
+                            Object.keys(ms).forEach(k => {
+                                if (ms[k] && ms[k] <= currDate) validMs[k] = ms[k];
+                            });
+
+                            if (Object.keys(validMs).length > 0) {
+                                const latestKey = Object.keys(validMs).reduce((a, b) => validMs[a] > validMs[b] ? a : b);
+
+                                if (latestKey === 'Approved') appCount++;
+                                else if (latestKey.includes('Rej')) rejCount++;
+                                else if (latestKey.includes('Sub') || latestKey.includes('Resub')) gtCount++;
+                                else {
+                                    const elapsed = Math.floor((currDate - d.TRFSDate) / dayMs);
+                                    if (elapsed <= 21) withinCount++;
+                                    else beyondCount++;
+                                }
+                            } else {
+                                if (cat === 'APPROVED') appCount++;
+                                else if (cat === 'FOR_REVIEW' || cat === 'RE_SUBMIT') gtCount++;
+                                else if (cat === 'REJECTED') rejCount++;
+                                else if (cat === 'ONGOING_WITHIN_SLA') withinCount++;
+                                else if (cat === 'ONGOING_BEYOND_SLA') beyondCount++;
+                            }
+                        }
+                    }
+                });
+
+                ssvData.withinSLA.push(withinCount);
+                ssvData.beyondSLA.push(beyondCount);
+                ssvData.gtReview.push(gtCount);
+                ssvData.rejected.push(rejCount);
+                ssvData.approved.push(appCount);
+
+                const agingCounts = getNotTrfsAgingCounts(filteredDataset, currDate, notTrfsViewMode);
+                agingData.u2.push(agingCounts.u2);
+                agingData.d2_10.push(agingCounts.d2_10);
+                agingData.d10_20.push(agingCounts.d10_20);
+                agingData.b20.push(agingCounts.b20);
+            });
+
+            const dateLabels = timeline.map(d => formatDate(d));
+
+            const traces1 = [
+                { x: dateLabels, y: ssvData.withinSLA, name: 'ONGOING WITHIN SLA', type: 'bar', marker: { color: '#FFC107' } },
+                { x: dateLabels, y: ssvData.beyondSLA, name: 'ONGOING BEYOND SLA', type: 'bar', marker: { color: '#FF0000' } },
+                { x: dateLabels, y: ssvData.gtReview, name: 'FOR GT REVIEW', type: 'bar', marker: { color: '#5D9CEC' } },
+                { x: dateLabels, y: ssvData.rejected, name: 'REJECTED / REVISION', type: 'bar', marker: { color: '#FF8C00' } },
+                { x: dateLabels, y: ssvData.approved, name: 'SSV APPROVED', type: 'bar', marker: { color: '#2ECC71' } }
+            ];
+
+            const layout1 = {
+                barmode: 'stack',
+                paper_bgcolor: 'transparent',
+                plot_bgcolor: 'transparent',
+                font: { color: '#94A3B8', family: 'Inter, sans-serif' },
+                margin: { l: 50, r: 20, t: 15, b: 85 },
+                xaxis: { gridcolor: '#1E293B', tickangle: -45, automargin: true },
+                yaxis: { gridcolor: '#1E293B', zeroline: false },
+                legend: { orientation: 'h', y: 1.18, x: 0.5, xanchor: 'center' }
+            };
+
+            Plotly.react('ssv-progress-chart', traces1, layout1, { responsive: true, displayModeBar: false });
+
+            const traces2 = [
+                { x: dateLabels, y: agingData.b20, name: 'Beyond 20 Days', type: 'bar', marker: { color: '#FF0000' } },
+                { x: dateLabels, y: agingData.d10_20, name: '10 - 20 Days', type: 'bar', marker: { color: '#FF8C00' } },
+                { x: dateLabels, y: agingData.d2_10, name: '2 - 10 Days', type: 'bar', marker: { color: '#FFC107' } },
+                { x: dateLabels, y: agingData.u2, name: 'Within 2 Days', type: 'bar', marker: { color: '#2ECC71' } }
+            ];
+
+            const layout2 = {
+                barmode: 'stack',
+                paper_bgcolor: 'transparent',
+                plot_bgcolor: 'transparent',
+                font: { color: '#94A3B8', family: 'Inter, sans-serif' },
+                margin: { l: 50, r: 20, t: 15, b: 85 },
+                xaxis: { gridcolor: '#1E293B', tickangle: -45, automargin: true },
+                yaxis: { gridcolor: '#1E293B', zeroline: false },
+                legend: { orientation: 'h', y: 1.18, x: 0.5, xanchor: 'center' }
+            };
+
+            Plotly.react('not-trfs-aging-chart', traces2, layout2, { responsive: true, displayModeBar: false });
+        }
+
+        function renderTable() {
+            const tbody = document.getElementById('master-table-body');
+            const searchQuery = (document.getElementById('table-search')?.value || '').toLowerCase().trim();
+
+            let rows = filteredDataset;
+            if (searchQuery) {
+                rows = rows.filter(d => 
+                    `${d.Lookup} ${d.PLAID} ${d.Category} ${d.SiteName} ${d.Province} ${d.Town} ${d.ApprovalStatus}`.toLowerCase().includes(searchQuery)
+                );
+            }
+
+            const totalRows = rows.length;
+            const totalPages = Math.ceil(totalRows / PAGE_SIZE) || 1;
+            if (tablePage > totalPages) tablePage = totalPages;
+
+            const startIdx = (tablePage - 1) * PAGE_SIZE;
+            const paginatedRows = rows.slice(startIdx, startIdx + PAGE_SIZE);
+
+            if (paginatedRows.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="13" class="p-6 text-center text-slate-500">No logical site records found matching filter criteria.</td></tr>`;
+                document.getElementById('table-pagination').innerHTML = '';
+                return;
+            }
+
+            tbody.innerHTML = paginatedRows.map((r, idx) => {
+                const globalIdx = startIdx + idx + 1;
+                let statusBadge = 'bg-slate-800 text-slate-300 border-slate-700';
+                const cat = categorizeRecord(r);
+
+                if (cat === 'APPROVED') statusBadge = 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30';
+                else if (cat === 'REJECTED') statusBadge = 'bg-red-500/20 text-red-400 border-red-500/30';
+                else if (cat === 'NOT_YET_TRFS') statusBadge = 'bg-purple-500/20 text-purple-300 border-purple-500/30';
+                else if (cat === 'FOR_REVIEW' || cat === 'RE_SUBMIT') statusBadge = 'bg-sky-500/20 text-sky-300 border-sky-500/30';
+                else statusBadge = 'bg-amber-500/20 text-amber-400 border-amber-500/30';
+
+                return `
+                    <tr class="hover:bg-slate-900/60 transition border-b border-slate-800/40">
+                        <td class="p-3 text-center font-bold text-slate-500">${globalIdx}</td>
+                        <td class="p-3 font-mono font-bold text-blue-400">${r.Lookup}</td>
+                        <td class="p-3 font-mono text-slate-300">${r.PLAID}</td>
+                        <td class="p-3 text-slate-300 font-semibold">${r.Category}</td>
+                        <td class="p-3 font-medium text-slate-200">${r.SiteName}</td>
+                        <td class="p-3 text-slate-300">${r.Province}</td>
+                        <td class="p-3 text-slate-300">${r.Tech}</td>
+                        <td class="p-3 text-slate-300">${r.Band}</td>
+                        <td class="p-3 text-slate-400">${formatDate(r.SwapDate)}</td>
+                        <td class="p-3 text-blue-300 font-medium">${formatDate(r.TRFSDate)}</td>
+                        <td class="p-3 text-amber-300">${formatDate(r.DateSubmitted)}</td>
+                        <td class="p-3">
+                            <span class="inline-block px-2.5 py-0.5 text-[11px] font-semibold rounded-md border ${statusBadge}">
+                                ${r.ApprovalStatus}
+                            </span>
+                        </td>
+                        <td class="p-3 text-emerald-400 font-semibold">${formatDate(r.DateApproved)}</td>
+                    </tr>
+                `;
+            }).join('');
+
+            document.getElementById('table-pagination').innerHTML = `
+                <span>Showing ${startIdx + 1} - ${Math.min(startIdx + PAGE_SIZE, totalRows)} of ${totalRows} logical sites</span>
+                <div class="flex items-center gap-2">
+                    <button onclick="changeTablePage(-1)" ${tablePage === 1 ? 'disabled' : ''} class="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 disabled:opacity-40 rounded text-slate-200 font-medium">Prev</button>
+                    <span>Page ${tablePage} of ${totalPages}</span>
+                    <button onclick="changeTablePage(1)" ${tablePage === totalPages ? 'disabled' : ''} class="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 disabled:opacity-40 rounded text-slate-200 font-medium">Next</button>
+                </div>
+            `;
+        }
+
+        function changeTablePage(delta) {
+            tablePage += delta;
+            renderTable();
+        }
+
+        function downloadCSV(filename, csvText) {
+            const blob = new Blob([csvText], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        function exportTableCSV() {
+            const headers = ['Lookup Ref', 'PLAID', 'Category', 'Site Name', 'Province', 'Town', 'Tech', 'Band', 'Swap Date', 'TRFS Date', 'Date Submitted', 'Approval Status', 'Date Approved'];
+            let csv = headers.map(h => `"${h}"`).join(',') + '\n';
+
+            filteredDataset.forEach(r => {
+                const vals = [
+                    `"${r.Lookup}"`, `"${r.PLAID}"`, `"${r.Category}"`, `"${r.SiteName}"`, `"${r.Province}"`, `"${r.Town}"`, `"${r.Tech}"`, `"${r.Band}"`,
+                    `"${formatDate(r.SwapDate)}"`, `"${formatDate(r.TRFSDate)}"`, `"${formatDate(r.DateSubmitted)}"`,
+                    `"${r.ApprovalStatus}"`, `"${formatDate(r.DateApproved)}"`
+                ];
+                csv += vals.join(',') + '\n';
+            });
+
+            downloadCSV(`HERMES_SSV_LogicalSite_Records.csv`, csv);
+        }
+    </script>
+</body>
+</html>
