@@ -58,7 +58,7 @@
                         <span>Sheet: <strong class="text-slate-300">Sheet1</strong></span>
                         <span class="inline-block w-1 h-1 rounded-full bg-slate-600"></span>
                         <span id="sync-status" class="text-emerald-400 flex items-center gap-1">
-                            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Connecting...
+                            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Initializing...
                         </span>
                     </p>
                 </div>
@@ -83,6 +83,7 @@
 
     <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
 
+        <!-- GLOBAL FILTERS -->
         <div class="chart-card p-4 rounded-2xl flex flex-wrap items-center justify-between gap-4">
             <div class="flex flex-wrap items-center gap-3 w-full lg:w-auto">
                 <div class="flex items-center gap-2">
@@ -119,9 +120,8 @@
             </div>
         </div>
 
+        <!-- SUMMARY KPI CARDS -->
         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3">
-
-            <!-- 1. TOTAL SITES -->
             <div class="chart-card p-4 rounded-2xl border-l-4 border-l-blue-500 flex flex-col justify-between">
                 <div>
                     <div class="flex items-center justify-between text-slate-400 text-xs">
@@ -130,12 +130,9 @@
                     </div>
                     <div id="kpi-total" class="text-2xl font-black text-blue-400 mt-2">0</div>
                 </div>
-                <div id="kpi-total-sub" class="mt-3 pt-2 border-t border-slate-800/80 text-[11px] text-slate-400 truncate">
-                    Unique Lookup Entries
-                </div>
+                <div id="kpi-total-sub" class="mt-3 pt-2 border-t border-slate-800/80 text-[11px] text-slate-400 truncate">Unique Lookup Entries</div>
             </div>
 
-            <!-- 2. SSV APPROVED -->
             <div class="chart-card p-4 rounded-2xl border-l-4 border-l-emerald-500 flex flex-col justify-between">
                 <div>
                     <div class="flex items-center justify-between text-slate-400 text-xs">
@@ -149,7 +146,6 @@
                 </div>
             </div>
 
-            <!-- 3. FOR GT REVIEW -->
             <div class="chart-card p-4 rounded-2xl border-l-4 border-l-blue-500 flex flex-col justify-between">
                 <div>
                     <div class="flex items-center justify-between text-slate-400 text-xs">
@@ -164,7 +160,6 @@
                 </div>
             </div>
 
-            <!-- 4. ONGOING WITHIN SLA -->
             <div class="chart-card p-4 rounded-2xl border-l-4 border-l-amber-500 flex flex-col justify-between">
                 <div>
                     <div class="flex items-center justify-between text-slate-400 text-xs">
@@ -178,7 +173,6 @@
                 </div>
             </div>
 
-            <!-- 5. ONGOING BEYOND SLA -->
             <div class="chart-card p-4 rounded-2xl border-l-4 border-l-red-500 flex flex-col justify-between">
                 <div>
                     <div class="flex items-center justify-between text-slate-400 text-xs">
@@ -192,7 +186,6 @@
                 </div>
             </div>
 
-            <!-- 6. REJECTED / REVISION -->
             <div class="chart-card p-4 rounded-2xl border-l-4 border-l-orange-500 flex flex-col justify-between">
                 <div>
                     <div class="flex items-center justify-between text-slate-400 text-xs">
@@ -206,7 +199,6 @@
                 </div>
             </div>
 
-            <!-- 7. NOT YET TRFS -->
             <div class="chart-card p-4 rounded-2xl border-l-4 border-l-purple-500 flex flex-col justify-between">
                 <div>
                     <div class="flex items-center justify-between text-slate-400 text-xs">
@@ -219,9 +211,9 @@
                     Pending Cutover / TRFS
                 </div>
             </div>
-
         </div>
 
+        <!-- PROGRESS CHART -->
         <div class="chart-card p-5 rounded-2xl space-y-3">
             <div class="flex flex-wrap items-center justify-between gap-4 border-b border-slate-800 pb-3">
                 <div>
@@ -229,10 +221,9 @@
                         <i data-lucide="bar-chart-3" class="w-5 h-5 text-blue-400"></i>
                         HERMES SSV PROGRESS (T8)
                     </h2>
-                    <p class="text-xs text-slate-400">Stacked Bar Chart | Evaluated by latest milestone per site</p>
+                    <p class="text-xs text-slate-400">Stacked Bar Chart | Tagged by final approved date for 100% approved unique/logical sites</p>
                 </div>
 
-                <!-- Logical Sites vs Physical Sites (Site Name) Toggle -->
                 <div class="flex items-center p-1 bg-slate-900 border border-slate-800 rounded-xl">
                     <button id="toggle-progress-logical" onclick="setProgressViewMode('LOGICAL')" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-blue-600 text-white transition flex items-center gap-1.5">
                         <i data-lucide="layers" class="w-3.5 h-3.5"></i> Logical Sites
@@ -246,6 +237,73 @@
             <div id="trend-chart" class="w-full h-[380px]"></div>
         </div>
 
+        <!-- SITE / AGGREGATION LEVEL SSV APPROVAL & MILESTONE BOTTLENECK ANALYSIS -->
+        <div class="chart-card p-5 rounded-2xl space-y-4 border-l-4 border-l-emerald-500">
+            <div class="flex flex-wrap items-center justify-between gap-4 border-b border-slate-800 pb-4">
+                <div>
+                    <h2 class="font-bold text-base text-slate-100 flex items-center gap-2">
+                        <i data-lucide="check-square" class="w-5 h-5 text-emerald-400"></i>
+                        Site & Milestone Bottleneck Aggregation
+                    </h2>
+                    <p class="text-xs text-slate-400 mt-0.5">Toggle row aggregation levels, sort by completion rate, and switch metric column views between Unique Site and Logical Site levels</p>
+                </div>
+
+                <div class="flex flex-wrap items-center gap-3">
+                    <!-- Row Aggregation Filter -->
+                    <div class="flex items-center gap-2">
+                        <span class="text-xs text-slate-400 font-medium">Group Row By:</span>
+                        <select id="site-agg-group" onchange="renderSiteSsvTable()" class="bg-slate-900 text-xs font-bold text-emerald-400 border border-slate-700 rounded-lg px-2.5 py-1.5 outline-none focus:ring-2 focus:ring-emerald-500">
+                            <option value="SITENAME">Physical Site Name</option>
+                            <option value="CLUSTER">Cluster Name</option>
+                            <option value="TOWN">Town / City</option>
+                            <option value="PROVINCE">Province</option>
+                        </select>
+                    </div>
+
+                    <!-- Sort Filter -->
+                    <div class="flex items-center gap-2">
+                        <span class="text-xs text-slate-400 font-medium">Sort By Rate:</span>
+                        <select id="site-sort-mode" onchange="renderSiteSsvTable()" class="bg-slate-900 text-xs font-semibold text-amber-400 border border-slate-700 rounded-lg px-2.5 py-1.5 outline-none focus:ring-2 focus:ring-amber-500">
+                            <option value="DEFAULT">Default (Alphabetical)</option>
+                            <option value="DESC">Highest Completion Rate</option>
+                            <option value="ASC">Lowest Completion Rate</option>
+                        </select>
+                    </div>
+
+                    <!-- Column Metric Toggle (Unique Physical Site vs Logical Site) -->
+                    <div class="flex items-center p-1 bg-slate-900 border border-slate-800 rounded-xl">
+                        <button id="toggle-site-col-unique" onclick="setSiteTableMetricMode('UNIQUE')" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-emerald-600 text-white transition flex items-center gap-1.5">
+                            <i data-lucide="map-pin" class="w-3.5 h-3.5"></i> Unique Site View
+                        </button>
+                        <button id="toggle-site-col-logical" onclick="setSiteTableMetricMode('LOGICAL')" class="px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-400 hover:text-white transition flex items-center gap-1.5">
+                            <i data-lucide="layers" class="w-3.5 h-3.5"></i> Logical Site View
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- KPI Summary Strip for Selected Aggregation -->
+            <div class="flex items-center justify-between px-4 py-2 bg-slate-900/90 border border-slate-800 rounded-xl text-xs font-semibold text-slate-200">
+                <span>100% Full Approval Rate: <strong id="site-ssv-pct" class="text-emerald-400 font-bold text-sm">0.0%</strong></span>
+                <span>Fully Approved Groupings: <strong id="site-ssv-approved-cnt" class="text-emerald-400 font-bold">0</strong> / <span id="site-ssv-total-cnt">0</span></span>
+            </div>
+
+            <!-- Aggregated Bottleneck Table -->
+            <div class="overflow-x-auto max-h-[450px] rounded-xl border border-slate-800">
+                <table id="site-ssv-table" class="w-full text-left text-xs text-slate-300">
+                    <thead class="bg-slate-900 text-slate-400 sticky top-0 uppercase tracking-wider font-semibold border-b border-slate-800">
+                        <tr id="site-ssv-table-head">
+                            <!-- Headers dynamically rendered in JS based on Group By selection -->
+                        </tr>
+                    </thead>
+                    <tbody id="site-ssv-table-body" class="divide-y divide-slate-800/60 bg-slate-950/40">
+                        <tr><td colspan="8" class="p-6 text-center text-slate-500">Calculating unique site milestone readiness...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- AGING CHART -->
         <div class="chart-card p-5 rounded-2xl space-y-4">
             <div class="flex flex-wrap items-center justify-between gap-4 border-b border-slate-800 pb-3">
                 <div>
@@ -266,7 +324,6 @@
                 </div>
             </div>
 
-            <!-- 5 KPI CARDS FOR NOT YET TRFS AGING -->
             <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-3">
                 <div class="bg-slate-900/80 p-3.5 rounded-xl border border-purple-500/30 border-l-4 border-l-purple-500">
                     <div class="text-[10px] text-purple-300 font-semibold uppercase">TOTAL NOT YET TRFS</div>
@@ -293,6 +350,7 @@
             <div id="aging-chart" class="w-full h-[360px]"></div>
         </div>
 
+        <!-- MASTER RECORD TABLE -->
         <div class="chart-card p-5 rounded-2xl space-y-4">
             <div class="flex flex-wrap items-center justify-between gap-4 border-b border-slate-800 pb-3">
                 <div>
@@ -308,7 +366,6 @@
                 </button>
             </div>
 
-            <!-- Master Table KPI Summary Cards -->
             <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-3">
                 <div class="bg-slate-900/80 p-3 rounded-xl border border-blue-500/20">
                     <div class="text-[10px] text-blue-400 font-semibold uppercase">TOTAL SITES</div>
@@ -340,7 +397,6 @@
                 </div>
             </div>
 
-            <!-- Toolbar Controls -->
             <div class="flex flex-wrap items-center justify-between gap-3 bg-slate-900/60 p-3 rounded-xl border border-slate-800">
                 <div class="flex flex-wrap items-center gap-3">
                     <div class="flex items-center gap-2">
@@ -371,7 +427,6 @@
                 </div>
             </div>
 
-            <!-- Master Table -->
             <div class="overflow-x-auto max-h-[500px] rounded-xl border border-slate-800">
                 <table id="master-table" class="w-full text-left text-xs text-slate-300">
                     <thead class="bg-slate-900 text-slate-400 sticky top-0 uppercase tracking-wider font-semibold border-b border-slate-800">
@@ -388,16 +443,19 @@
                             <th class="p-3">Milestone Status</th>
                         </tr>
                     </thead>
-                    <tbody id="master-table-body" class="divide-y divide-slate-800/60 bg-slate-950/40"></tbody>
+                    <tbody id="master-table-body" class="divide-y divide-slate-800/60 bg-slate-950/40">
+                        <tr><td colspan="10" class="p-6 text-center text-slate-500">Loading master dataset records...</td></tr>
+                    </tbody>
                 </table>
             </div>
 
-            <div id="master-pagination" class="flex items-center justify-between text-xs text-slate-400 pt-1"></div>
+            <div id="master-pagination" class="flex items-center justify-between text-xs text-slate-400 pt-1">
+                <span>Showing 0 entries</span>
+            </div>
         </div>
 
     </main>
 
-    <!-- Share Link Modal -->
     <div id="share-modal" class="fixed inset-0 z-50 hidden bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
         <div class="chart-card max-w-lg w-full p-6 rounded-2xl border border-slate-700 shadow-2xl space-y-5 relative">
             <button onclick="toggleShareModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white p-1 rounded-lg">
@@ -443,8 +501,9 @@
         const FALLBACK_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/pub?output=csv&gid=0`;
 
         let rawDataset = [];
-        let progressViewMode = 'LOGICAL'; // 'LOGICAL' or 'PLAID' (Site Name)
-        let agingViewMode = 'LOGICAL';    // 'LOGICAL' or 'PLAID' (Site Name)
+        let progressViewMode = 'LOGICAL';
+        let agingViewMode = 'LOGICAL';
+        let siteTableMetricMode = 'UNIQUE'; // 'UNIQUE' physical sites vs 'LOGICAL' site rows
         let masterPage = 1;
         const PAGE_SIZE = 50;
 
@@ -456,7 +515,7 @@
             } catch (e) {}
 
             const lanInput = document.getElementById('share-lan-url');
-            if (lanInput) lanInput.value = `http://192.168.254.103:8080`;
+            if (lanInput) lanInput.value = `http://192.168.108.107:8080`;
             const browserInput = document.getElementById('share-browser-url');
             if (browserInput) browserInput.value = window.location.href;
 
@@ -622,6 +681,7 @@
             const colCategory = hRow.findIndex(c => c === 'CATEGORY' || c.includes('CATEGORY'));
             const colSiteName = hRow.findIndex(c => (c.includes('SITE') && c.includes('NAME')) || c.includes('PHYSICAL SITE') || c === 'SITE_NAME' || c === 'SITE NAME');
             const colPlaid = hRow.findIndex(c => c === 'PLAID' || c.includes('PLAID'));
+            const colCluster = hRow.findIndex(c => c.includes('CLUSTER') || c === 'CLUSTER_NAME');
             const colVendor = hRow.findIndex(c => c === 'VENDOR' || c.includes('VENDOR'));
             const colProvince = hRow.findIndex(c => c === 'PROVINCE' || c.includes('PROVINCE'));
             const colTown = hRow.findIndex(c => c === 'TOWN' || c === 'CITY' || c.includes('TOWN'));
@@ -630,7 +690,6 @@
             const colStatus = hRow.findIndex(c => c.includes('APPROVAL') || c.includes('STATUS') || c.includes('MILESTONE'));
             const colTech = hRow.findIndex(c => c.includes('BAND') || c.includes('TECH') || c.includes('SYSTEM'));
 
-            // Transition Date Columns
             const colSubmit1 = hRow.findIndex(c => (c.includes('SUBMIT') || c.includes('DATE SUBMIT')) && !c.includes('RE-') && !c.includes('RESUB') && !c.includes('1ST RE') && !c.includes('2ND RE'));
             const colReject1 = hRow.findIndex(c => c.includes('1ST') && (c.includes('REJECT') || c.includes('REVIS')));
             const colSubmit2 = hRow.findIndex(c => c.includes('1ST') && (c.includes('RE-SUBMIT') || c.includes('RESUBMIT')));
@@ -648,6 +707,7 @@
                 const lookupVal = clean(colLookup !== -1 ? row[colLookup] : '');
                 const siteNameVal = clean(colSiteName !== -1 ? row[colSiteName] : '').toUpperCase().trim();
                 const plaidVal = clean(colPlaid !== -1 ? row[colPlaid] : '').toUpperCase().trim();
+                const clusterVal = clean(colCluster !== -1 ? row[colCluster] : 'UNSPECIFIED CLUSTER').toUpperCase().trim();
                 const categoryVal = clean(colCategory !== -1 ? row[colCategory] : 'SWAP').toUpperCase();
                 const vendorVal = clean(colVendor !== -1 ? row[colVendor] : 'UNKNOWN').toUpperCase();
                 const provVal = clean(colProvince !== -1 ? row[colProvince] : 'UNSPECIFIED').toUpperCase();
@@ -663,7 +723,7 @@
                 const submit2DateObj = parseFlexibleDate(colSubmit2 !== -1 ? row[colSubmit2] : '');
                 const reject2DateObj = parseFlexibleDate(colReject2 !== -1 ? row[colReject2] : '');
                 const submit3DateObj = parseFlexibleDate(colSubmit3 !== -1 ? row[colSubmit3] : '');
-                const approvedDateObj = parseFlexibleDate(colApproved !== -1 ? row[colApproved] : '');
+                let approvedDateObj = parseFlexibleDate(colApproved !== -1 ? row[colApproved] : '');
 
                 const finalLookup = lookupVal || (siteNameVal || plaidVal ? `${siteNameVal || plaidVal}_SITE` : `ROW_${i}`);
                 if (!finalLookup || provVal.includes('GRAND TOTAL')) continue;
@@ -673,8 +733,9 @@
                 let isForReview = false;
                 let isResubmit = false;
 
-                if (statusUpper.includes('APPROVED')) {
+                if (statusUpper.includes('APPROVED') || statusUpper.includes('PASSED')) {
                     milestone = 'SSV APPROVED';
+                    if (!approvedDateObj) approvedDateObj = trfsDateObj || swapDateObj || new Date();
                 } else if (statusUpper.includes('REVIEW') || statusUpper.includes('SUBMIT')) {
                     milestone = 'FOR GT REVIEW';
                     if (statusUpper.includes('RE-SUBMIT') || statusUpper.includes('RESUBMIT')) {
@@ -696,6 +757,7 @@
                     Lookup: finalLookup,
                     PLAID: plaidVal || finalLookup,
                     SiteName: finalSiteName,
+                    Cluster: clusterVal || 'UNSPECIFIED CLUSTER',
                     Category: categoryVal || 'SWAP',
                     Vendor: vendorVal,
                     Province: provVal,
@@ -721,6 +783,11 @@
         }
 
         function getLogicalSiteStatusOnDate(d, dt) {
+            if (d.Milestone === 'SSV APPROVED') {
+                const appDt = d.ApprovedDate || d.TrfsDate || d.SwapDate;
+                if (appDt && dt >= appDt) return 'SSV APPROVED';
+            }
+
             const refDate = d.TrfsDate || d.SwapDate;
             if (refDate && dt < refDate) {
                 return 'NOT YET TRFS';
@@ -766,8 +833,6 @@
             return 'NOT YET TRFS';
         }
 
-        // Unique Physical Site Priority Evaluator:
-        // SSV APPROVED (100% approved) -> NOT YET TRFS -> ONGOING WITHIN -> ONGOING BEYOND -> REJECTED -> FOR GT REVIEW
         function getPlaidStatus(items, dt = null) {
             let validItems = items;
             if (dt) {
@@ -811,6 +876,189 @@
             }
 
             return 'NOT YET TRFS';
+        }
+
+        function setSiteTableMetricMode(mode) {
+            siteTableMetricMode = mode;
+            document.getElementById('toggle-site-col-unique').className = mode === 'UNIQUE'
+                ? 'px-3 py-1.5 rounded-lg text-xs font-semibold bg-emerald-600 text-white transition flex items-center gap-1.5'
+                : 'px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-400 hover:text-white transition flex items-center gap-1.5';
+
+            document.getElementById('toggle-site-col-logical').className = mode === 'LOGICAL'
+                ? 'px-3 py-1.5 rounded-lg text-xs font-semibold bg-emerald-600 text-white transition flex items-center gap-1.5'
+                : 'px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-400 hover:text-white transition flex items-center gap-1.5';
+
+            renderSiteSsvTable();
+        }
+
+        function renderSiteSsvTable() {
+            const data = getFilteredDataset();
+            const groupKey = document.getElementById('site-agg-group').value; // 'SITENAME', 'CLUSTER', 'TOWN', 'PROVINCE'
+            const sortMode = document.getElementById('site-sort-mode').value; // 'DEFAULT', 'DESC', 'ASC'
+
+            const headTr = document.getElementById('site-ssv-table-head');
+
+            // Dynamic Table Headers Construction
+            let headHtml = `<th class="p-3 w-12 text-center">#</th>`;
+
+            if (groupKey === 'CLUSTER') {
+                headHtml += `<th class="p-3 font-mono text-blue-400">Cluster Name</th>`;
+            } else if (groupKey === 'TOWN') {
+                headHtml += `<th class="p-3 font-mono text-blue-400">Town / City</th>`;
+                headHtml += `<th class="p-3">Province</th>`; // Retained for Town segregation across provinces
+            } else if (groupKey === 'PROVINCE') {
+                headHtml += `<th class="p-3 font-mono text-blue-400">Province</th>`;
+            } else {
+                headHtml += `<th class="p-3 font-mono text-blue-400">Physical Site Name</th>`;
+                headHtml += `<th class="p-3">Province</th>`;
+                headHtml += `<th class="p-3">Town / City</th>`;
+            }
+
+            const thTotalTxt = siteTableMetricMode === 'UNIQUE' ? 'Total Unique Sites' : 'Total Logical Sites';
+            const thApprovedTxt = siteTableMetricMode === 'UNIQUE' ? '100% Approved Unique Sites' : 'Approved Logical Sites';
+
+            headHtml += `
+                <th class="p-3 text-center">${thTotalTxt}</th>
+                <th class="p-3 text-center">${thApprovedTxt}</th>
+                <th class="p-3 text-center">Approval Progress</th>
+                <th class="p-3 text-amber-400">Open Milestone Bottlenecks to 100%</th>
+            `;
+            headTr.innerHTML = headHtml;
+
+            const groupMap = {};
+
+            data.forEach(d => {
+                let keyVal = d.SiteName;
+                if (groupKey === 'CLUSTER') keyVal = d.Cluster || 'UNSPECIFIED CLUSTER';
+                else if (groupKey === 'TOWN') keyVal = `${d.Town || 'UNSPECIFIED TOWN'}||${d.Province || 'UNSPECIFIED'}`;
+                else if (groupKey === 'PROVINCE') keyVal = d.Province || 'UNSPECIFIED PROVINCE';
+
+                if (!groupMap[keyVal]) {
+                    groupMap[keyVal] = {
+                        Key: keyVal,
+                        GroupName: groupKey === 'TOWN' ? (d.Town || 'UNSPECIFIED TOWN') : keyVal,
+                        Province: d.Province,
+                        Town: d.Town,
+                        Rows: []
+                    };
+                }
+                groupMap[keyVal].Rows.push(d);
+            });
+
+            let groupList = Object.values(groupMap);
+            let totalOverallUnits = 0;
+            let approvedOverallUnits = 0;
+
+            const processedGroups = groupList.map(g => {
+                const rows = g.Rows;
+                let unitTotal = 0;
+                let unitApproved = 0;
+                const pendingMilestones = new Set();
+
+                if (siteTableMetricMode === 'UNIQUE') {
+                    const siteSubMap = {};
+                    rows.forEach(r => {
+                        const sKey = r.SiteName;
+                        if (!siteSubMap[sKey]) siteSubMap[sKey] = [];
+                        siteSubMap[sKey].push(r);
+                    });
+
+                    const uniqueSites = Object.values(siteSubMap);
+                    unitTotal = uniqueSites.length;
+
+                    uniqueSites.forEach(siteRows => {
+                        const is100Approved = siteRows.length > 0 && siteRows.every(r => r.Milestone === 'SSV APPROVED');
+                        if (is100Approved) {
+                            unitApproved++;
+                        } else {
+                            siteRows.forEach(r => {
+                                if (r.Milestone !== 'SSV APPROVED') {
+                                    pendingMilestones.add(r.Milestone || 'PENDING FIELD SSV');
+                                }
+                            });
+                        }
+                    });
+                } else {
+                    unitTotal = rows.length;
+                    rows.forEach(r => {
+                        if (r.Milestone === 'SSV APPROVED') {
+                            unitApproved++;
+                        } else {
+                            pendingMilestones.add(r.Milestone || 'PENDING FIELD SSV');
+                        }
+                    });
+                }
+
+                totalOverallUnits += unitTotal;
+                approvedOverallUnits += unitApproved;
+
+                const pctNum = unitTotal > 0 ? (unitApproved / unitTotal) : 0;
+                return {
+                    ...g,
+                    UnitTotal: unitTotal,
+                    UnitApproved: unitApproved,
+                    PctNum: pctNum,
+                    PendingMilestones: Array.from(pendingMilestones)
+                };
+            });
+
+            // Apply Sorting Mechanism
+            if (sortMode === 'DESC') {
+                processedGroups.sort((a, b) => b.PctNum - a.PctNum || b.UnitTotal - a.UnitTotal);
+            } else if (sortMode === 'ASC') {
+                processedGroups.sort((a, b) => a.PctNum - b.PctNum || a.UnitTotal - b.UnitTotal);
+            } else {
+                processedGroups.sort((a, b) => a.GroupName.localeCompare(b.GroupName));
+            }
+
+            const tableRowsHtml = processedGroups.map((g, idx) => {
+                const isFullyComplete = g.UnitTotal > 0 && g.UnitApproved === g.UnitTotal;
+                const pctGroup = (g.PctNum * 100).toFixed(1);
+
+                const statusBadge = isFullyComplete
+                    ? `<span class="px-2 py-0.5 whitespace-nowrap rounded-md text-[10px] font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">100% APPROVED</span>`
+                    : `<span class="px-2 py-0.5 whitespace-nowrap rounded-md text-[10px] font-bold bg-amber-500/20 text-amber-400 border border-amber-500/30">${pctGroup}% (${g.UnitApproved}/${g.UnitTotal})</span>`;
+
+                const bottleneckText = isFullyComplete
+                    ? `<span class="text-slate-500 flex items-center gap-1"><i data-lucide="check-circle-2" class="w-3.5 h-3.5 text-emerald-400"></i> All Requirements Satisfied</span>`
+                    : `<span class="text-amber-300 font-medium">${g.PendingMilestones.join(', ')}</span>`;
+
+                let rowCols = `<td class="p-3 text-center font-bold text-slate-500">${idx + 1}</td>`;
+                rowCols += `<td class="p-3 font-mono font-bold text-blue-300">${g.GroupName}</td>`;
+
+                if (groupKey === 'SITENAME') {
+                    rowCols += `<td class="p-3 text-slate-300">${g.Province}</td>`;
+                    rowCols += `<td class="p-3 text-slate-300">${g.Town}</td>`;
+                } else if (groupKey === 'TOWN') {
+                    rowCols += `<td class="p-3 text-slate-300">${g.Province}</td>`;
+                }
+
+                rowCols += `
+                    <td class="p-3 text-center font-semibold text-slate-200">${g.UnitTotal}</td>
+                    <td class="p-3 text-center font-semibold text-emerald-400">${g.UnitApproved}</td>
+                    <td class="p-3 text-center">${statusBadge}</td>
+                    <td class="p-3">${bottleneckText}</td>
+                `;
+
+                return `<tr class="hover:bg-slate-900/60 transition border-b border-slate-800/40">${rowCols}</tr>`;
+            }).join('');
+
+            const overallPct = totalOverallUnits > 0 ? ((approvedOverallUnits / totalOverallUnits) * 100).toFixed(1) : '0.0';
+            document.getElementById('site-ssv-pct').innerText = `${overallPct}%`;
+            document.getElementById('site-ssv-approved-cnt').innerText = approvedOverallUnits.toLocaleString();
+            document.getElementById('site-ssv-total-cnt').innerText = totalOverallUnits.toLocaleString();
+
+            const tbody = document.getElementById('site-ssv-table-body');
+            if (processedGroups.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="8" class="p-6 text-center text-slate-500">No matching records found for the selected aggregation filters.</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = tableRowsHtml;
+
+            if (window.lucide && typeof lucide.createIcons === 'function') {
+                lucide.createIcons();
+            }
         }
 
         function populateDropdowns() {
@@ -887,6 +1135,7 @@
             masterPage = 1;
             updateKPIs();
             renderTrendChart();
+            renderSiteSsvTable();
             renderAgingChart();
             renderMasterTable();
         }
@@ -922,7 +1171,6 @@
                 document.getElementById('kpi-total-title').innerText = 'TOTAL LOGICAL SITES';
                 document.getElementById('kpi-total-sub').innerText = 'Unique Lookup Entries';
             } else {
-                // Group by Site Name
                 const siteMap = {};
                 data.forEach(d => {
                     const key = (d.SiteName || d.PLAID || d.Lookup).toUpperCase().trim();
@@ -964,7 +1212,6 @@
             document.getElementById('kpi-ongoing-within').innerText = ongoingWithin.toLocaleString();
             document.getElementById('kpi-not-trfs').innerText = notTrfs.toLocaleString();
 
-            // NOT YET TRFS AGING KPI CARDS
             let nonTrfsItems = [];
             if (agingViewMode === 'LOGICAL') {
                 nonTrfsItems = data.filter(d => d.Milestone === 'NOT YET TRFS');
@@ -1137,7 +1384,6 @@
                         }
                     });
                 } else {
-                    // Unique Physical Site (Site Name) Mode
                     const siteMap = {};
                     data.forEach(d => {
                         const key = (d.SiteName || d.PLAID || d.Lookup).toUpperCase().trim();
