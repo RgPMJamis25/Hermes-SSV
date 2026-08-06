@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>HERMES SSV Progress Tracker & Milestone Dashboard</title>
 
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -20,13 +19,8 @@
         }
     </script>
 
-    <!-- Plotly.js -->
     <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
-
-    <!-- PapaParse CSV -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
-
-    <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
 
     <style>
@@ -249,7 +243,6 @@
                 </div>
 
                 <div class="flex flex-wrap items-center gap-3">
-                    <!-- Row Aggregation Filter -->
                     <div class="flex items-center gap-2">
                         <span class="text-xs text-slate-400 font-medium">Group Row By:</span>
                         <select id="site-agg-group" onchange="renderSiteSsvTable()" class="bg-slate-900 text-xs font-bold text-emerald-400 border border-slate-700 rounded-lg px-2.5 py-1.5 outline-none focus:ring-2 focus:ring-emerald-500">
@@ -260,7 +253,6 @@
                         </select>
                     </div>
 
-                    <!-- Sort Filter -->
                     <div class="flex items-center gap-2">
                         <span class="text-xs text-slate-400 font-medium">Sort By Rate:</span>
                         <select id="site-sort-mode" onchange="renderSiteSsvTable()" class="bg-slate-900 text-xs font-semibold text-amber-400 border border-slate-700 rounded-lg px-2.5 py-1.5 outline-none focus:ring-2 focus:ring-amber-500">
@@ -270,7 +262,6 @@
                         </select>
                     </div>
 
-                    <!-- Column Metric Toggle (Unique Physical Site vs Logical Site) -->
                     <div class="flex items-center p-1 bg-slate-900 border border-slate-800 rounded-xl">
                         <button id="toggle-site-col-unique" onclick="setSiteTableMetricMode('UNIQUE')" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-emerald-600 text-white transition flex items-center gap-1.5">
                             <i data-lucide="map-pin" class="w-3.5 h-3.5"></i> Unique Site View
@@ -282,18 +273,16 @@
                 </div>
             </div>
 
-            <!-- KPI Summary Strip for Selected Aggregation -->
             <div class="flex items-center justify-between px-4 py-2 bg-slate-900/90 border border-slate-800 rounded-xl text-xs font-semibold text-slate-200">
                 <span>100% Full Approval Rate: <strong id="site-ssv-pct" class="text-emerald-400 font-bold text-sm">0.0%</strong></span>
                 <span>Fully Approved Groupings: <strong id="site-ssv-approved-cnt" class="text-emerald-400 font-bold">0</strong> / <span id="site-ssv-total-cnt">0</span></span>
             </div>
 
-            <!-- Aggregated Bottleneck Table -->
             <div class="overflow-x-auto max-h-[450px] rounded-xl border border-slate-800">
                 <table id="site-ssv-table" class="w-full text-left text-xs text-slate-300">
                     <thead class="bg-slate-900 text-slate-400 sticky top-0 uppercase tracking-wider font-semibold border-b border-slate-800">
                         <tr id="site-ssv-table-head">
-                            <!-- Headers dynamically rendered in JS based on Group By selection -->
+                            <!-- Dynamic Headings -->
                         </tr>
                     </thead>
                     <tbody id="site-ssv-table-body" class="divide-y divide-slate-800/60 bg-slate-950/40">
@@ -348,6 +337,154 @@
             </div>
 
             <div id="aging-chart" class="w-full h-[360px]"></div>
+        </div>
+
+        <!-- REJECTION REASONS & CLASSIFICATION (POSITIONED BELOW NOT YET TRFS AGING CHART) -->
+        <div class="chart-card p-5 rounded-2xl space-y-4 border-l-4 border-l-rose-500">
+            <div class="flex flex-wrap items-center justify-between gap-4 border-b border-slate-800 pb-3">
+                <div>
+                    <h2 class="font-bold text-base text-rose-400 flex items-center gap-2">
+                        <i data-lucide="alert-octagon" class="w-5 h-5 text-rose-500"></i>
+                        Detailed Rejection Classification & Remarks
+                    </h2>
+                    <p class="text-xs text-slate-400">Filtered strictly by Approval Status Milestones: <strong>Rejected</strong> and <strong>Re-submit</strong></p>
+                </div>
+
+                <div class="flex flex-wrap items-center gap-3">
+                    <div class="text-xs font-semibold px-3 py-1.5 bg-rose-500/10 text-rose-400 border border-rose-500/20 rounded-xl flex items-center gap-2">
+                        <span>Rejection Universe Milestones:</span>
+                        <span class="px-2 py-0.5 bg-red-500/20 text-red-400 rounded border border-red-500/30">Rejected: <strong id="rej-ms-rejected-cnt">0</strong></span>
+                        <span class="px-2 py-0.5 bg-amber-500/20 text-amber-400 rounded border border-amber-500/30">Re-submit: <strong id="rej-ms-resubmit-cnt">0</strong></span>
+                    </div>
+
+                    <div class="text-xs font-semibold px-3 py-1.5 bg-rose-500/20 text-rose-300 border border-rose-500/30 rounded-xl flex items-center gap-1.5">
+                        <span>Total Tracked Deficiencies:</span>
+                        <strong id="rej-kpi-total-reasons" class="text-white text-sm">0</strong>
+                    </div>
+                </div>
+            </div>
+
+            <!-- REJECTION CATEGORY KPI STRIP INCLUDING SEPARATE NOT TAGGED YET CARD -->
+            <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3">
+                <div class="bg-slate-900/80 p-3.5 rounded-xl border border-rose-500/20 flex flex-col justify-between">
+                    <div>
+                        <span class="text-[10px] text-slate-400 font-semibold uppercase leading-tight">1. Doc & Submission Quality</span>
+                        <div id="rej-kpi-c1" class="text-2xl font-black text-rose-400 mt-1">0</div>
+                    </div>
+                    <div id="rej-kpi-c1-pct" class="text-[10px] text-rose-300 font-medium mt-2 pt-1 border-t border-slate-800/80">0.0% of total</div>
+                </div>
+
+                <div class="bg-slate-900/80 p-3.5 rounded-xl border border-rose-500/20 flex flex-col justify-between">
+                    <div>
+                        <span class="text-[10px] text-slate-400 font-semibold uppercase leading-tight">2. Data & Config Mismatch</span>
+                        <div id="rej-kpi-c2" class="text-2xl font-black text-rose-400 mt-1">0</div>
+                    </div>
+                    <div id="rej-kpi-c2-pct" class="text-[10px] text-rose-300 font-medium mt-2 pt-1 border-t border-slate-800/80">0.0% of total</div>
+                </div>
+
+                <div class="bg-slate-900/80 p-3.5 rounded-xl border border-rose-500/20 flex flex-col justify-between">
+                    <div>
+                        <span class="text-[10px] text-slate-400 font-semibold uppercase leading-tight">3. Optimization Req.</span>
+                        <div id="rej-kpi-c3" class="text-2xl font-black text-rose-400 mt-1">0</div>
+                    </div>
+                    <div id="rej-kpi-c3-pct" class="text-[10px] text-rose-300 font-medium mt-2 pt-1 border-t border-slate-800/80">0.0% of total</div>
+                </div>
+
+                <div class="bg-slate-900/80 p-3.5 rounded-xl border border-rose-500/20 flex flex-col justify-between">
+                    <div>
+                        <span class="text-[10px] text-slate-400 font-semibold uppercase leading-tight">4. KPI Validation Fail</span>
+                        <div id="rej-kpi-c4" class="text-2xl font-black text-rose-400 mt-1">0</div>
+                    </div>
+                    <div id="rej-kpi-c4-pct" class="text-[10px] text-rose-300 font-medium mt-2 pt-1 border-t border-slate-800/80">0.0% of total</div>
+                </div>
+
+                <div class="bg-slate-900/80 p-3.5 rounded-xl border border-rose-500/20 flex flex-col justify-between">
+                    <div>
+                        <span class="text-[10px] text-slate-400 font-semibold uppercase leading-tight">5. Retest Required</span>
+                        <div id="rej-kpi-c5" class="text-2xl font-black text-rose-400 mt-1">0</div>
+                    </div>
+                    <div id="rej-kpi-c5-pct" class="text-[10px] text-rose-300 font-medium mt-2 pt-1 border-t border-slate-800/80">0.0% of total</div>
+                </div>
+
+                <div class="bg-slate-900/80 p-3.5 rounded-xl border border-rose-500/20 flex flex-col justify-between">
+                    <div>
+                        <span class="text-[10px] text-slate-400 font-semibold uppercase leading-tight">6. Site / Swap Corrections</span>
+                        <div id="rej-kpi-c6" class="text-2xl font-black text-rose-400 mt-1">0</div>
+                    </div>
+                    <div id="rej-kpi-c6-pct" class="text-[10px] text-rose-300 font-medium mt-2 pt-1 border-t border-slate-800/80">0.0% of total</div>
+                </div>
+
+                <!-- SEPARATE DEDICATED KPI CARD FOR BLANK / NOT TAGGED YET -->
+                <div class="bg-slate-900/80 p-3.5 rounded-xl border border-amber-500/30 border-l-4 border-l-amber-500 flex flex-col justify-between">
+                    <div>
+                        <span class="text-[10px] text-amber-400 font-semibold uppercase leading-tight flex items-center gap-1">
+                            <i data-lucide="help-circle" class="w-3 h-3 text-amber-400"></i> Not Tagged Yet (Blank)
+                        </span>
+                        <div id="rej-kpi-blank" class="text-2xl font-black text-amber-400 mt-1">0</div>
+                    </div>
+                    <div id="rej-kpi-blank-pct" class="text-[10px] text-amber-300/80 font-medium mt-2 pt-1 border-t border-slate-800/80">0.0% of total</div>
+                </div>
+            </div>
+
+            <!-- DETAILED REJECTION CLASSIFICATION TABLE -->
+            <div class="overflow-x-auto rounded-xl border border-slate-800">
+                <table class="w-full text-left text-xs text-slate-300">
+                    <thead class="bg-slate-900 text-slate-400 uppercase tracking-wider font-semibold border-b border-slate-800">
+                        <tr>
+                            <th class="p-3 w-1/3 text-rose-400">High-Level Rejection Reason Category</th>
+                            <th class="p-3 w-1/2">Remarks & Key Deficiencies</th>
+                            <th class="p-3 text-center w-32">Incidents Count</th>
+                            <th class="p-3 text-center w-32">Percentage Share (%)</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-800/60 bg-slate-950/40">
+                        <tr class="hover:bg-slate-900/60 transition bg-amber-500/5">
+                            <td class="p-3 font-semibold text-amber-400 flex items-center gap-1.5">
+                                <i data-lucide="alert-triangle" class="w-3.5 h-3.5 text-amber-400"></i> Not Tagged Yet (Blank in Column Y)
+                            </td>
+                            <td class="p-3 text-amber-300/80">Rejected or Re-submitted entries where the Rejection Reason / Deficiency has not been tagged in Google Sheet.</td>
+                            <td id="table-rej-cnt-blank" class="p-3 text-center font-bold text-amber-400 text-sm">0</td>
+                            <td id="table-rej-share-blank" class="p-3 text-center font-semibold text-amber-300">0.0%</td>
+                        </tr>
+                        <tr class="hover:bg-slate-900/60 transition">
+                            <td class="p-3 font-semibold text-rose-300">1. Documentation & Submission Quality</td>
+                            <td class="p-3 text-slate-400">Missing audit photos, minor details, license/power details, attachment issues (OSS/interim), incorrect cell info, missing data, no audit evidence.</td>
+                            <td id="table-rej-cnt-c1" class="p-3 text-center font-bold text-rose-400 text-sm">0</td>
+                            <td id="table-rej-share-c1" class="p-3 text-center font-semibold text-slate-300">0.0%</td>
+                        </tr>
+                        <tr class="hover:bg-slate-900/60 transition">
+                            <td class="p-3 font-semibold text-rose-300">2. Data Accuracy & Configuration Mismatch</td>
+                            <td class="p-3 text-slate-400">Data mismatch, incorrect configuration details, PCI alignment issues, incorrect cell information, missing/incorrect parameters.</td>
+                            <td id="table-rej-cnt-c2" class="p-3 text-center font-bold text-rose-400 text-sm">0</td>
+                            <td id="table-rej-share-c2" class="p-3 text-center font-semibold text-slate-300">0.0%</td>
+                        </tr>
+                        <tr class="hover:bg-slate-900/60 transition">
+                            <td class="p-3 font-semibold text-rose-300">3. Network Performance Requires Further Optimization</td>
+                            <td class="p-3 text-slate-400">Further optimization, SINR/RSRP optimization, degraded throughput despite good coverage, low PRB utilization, 1st tier neighbor optimization.</td>
+                            <td id="table-rej-cnt-c3" class="p-3 text-center font-bold text-rose-400 text-sm">0</td>
+                            <td id="table-rej-share-c3" class="p-3 text-center font-semibold text-slate-300">0.0%</td>
+                        </tr>
+                        <tr class="hover:bg-slate-900/60 transition">
+                            <td class="p-3 font-semibold text-rose-300">4. KPI / Performance Validation Failure</td>
+                            <td class="p-3 text-slate-400">Failed DT KPI, degraded RRC users, DL/UL traffic justification, speedtest errors, stationary test failures.</td>
+                            <td id="table-rej-cnt-c4" class="p-3 text-center font-bold text-rose-400 text-sm">0</td>
+                            <td id="table-rej-share-c4" class="p-3 text-center font-semibold text-slate-300">0.0%</td>
+                        </tr>
+                        <tr class="hover:bg-slate-900/60 transition">
+                            <td class="p-3 font-semibold text-rose-300">5. Retest Required</td>
+                            <td class="p-3 text-slate-400">Failed stationary tests, inconclusive validation, throughput degradation requiring re-validation.</td>
+                            <td id="table-rej-cnt-c5" class="p-3 text-center font-bold text-rose-400 text-sm">0</td>
+                            <td id="table-rej-share-c5" class="p-3 text-center font-semibold text-slate-300">0.0%</td>
+                        </tr>
+                        <tr class="hover:bg-slate-900/60 transition">
+                            <td class="p-3 font-semibold text-rose-300">6. Site Configuration / Swap Corrections</td>
+                            <td class="p-3 text-slate-400">Swap sector issues, PCI alignment corrections, sector mapping corrections.</td>
+                            <td id="table-rej-cnt-c6" class="p-3 text-center font-bold text-rose-400 text-sm">0</td>
+                            <td id="table-rej-share-c6" class="p-3 text-center font-semibold text-slate-300">0.0%</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
 
         <!-- MASTER RECORD TABLE -->
@@ -493,17 +630,15 @@
     </div>
 
     <script>
+        // Apps Script Direct URL for Standalone / GitHub Pages Mode
+        const DEPLOYMENT_ID = 'AKfycbx-JSY8LuqG3lxcmqJGdhG6WXXE0xgUqFcSBbU40aA-S33BS46ZWJT_x7nZ-4gTACcQkw';
+        const DIRECT_APPS_SCRIPT_URL = `https://script.google.com/macros/s/${DEPLOYMENT_ID}/exec`;
         const API_PROXY_URL = '/api/sheet-data';
-        const SHEET_ID = '15owO_lt9EltLfAVh5CEfOObWBGqR_HsT0GnzmRFpc6I';
-
-        const PRIMARY_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=0`;
-        const GVIZ_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&tq=select%20*`;
-        const FALLBACK_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/pub?output=csv&gid=0`;
 
         let rawDataset = [];
         let progressViewMode = 'LOGICAL';
         let agingViewMode = 'LOGICAL';
-        let siteTableMetricMode = 'UNIQUE'; // 'UNIQUE' physical sites vs 'LOGICAL' site rows
+        let siteTableMetricMode = 'UNIQUE';
         let masterPage = 1;
         const PAGE_SIZE = 50;
 
@@ -621,45 +756,54 @@
                 syncStatus.className = 'text-amber-400 flex items-center gap-1';
             }
 
-            const endpoints = [API_PROXY_URL, PRIMARY_URL, GVIZ_URL, FALLBACK_URL];
-            let csvText = null;
+            let responseText = null;
 
-            for (const url of endpoints) {
+            // Step A: Try local Python proxy first
+            try {
+                const res = await fetch(API_PROXY_URL);
+                if (res.ok) {
+                    responseText = await res.text();
+                }
+            } catch (err) {
+                console.log('Python server proxy not detected. Falling back to direct Google Apps Script...');
+            }
+
+            // Step B: Direct Google Apps Script fetch (GitHub Pages / Standalone HTML)
+            if (!responseText) {
                 try {
-                    const res = await fetch(url);
+                    const res = await fetch(DIRECT_APPS_SCRIPT_URL);
                     if (res.ok) {
-                        const text = await res.text();
-                        if (text && text.length > 50 && !text.startsWith('<!DOCTYPE html>')) {
-                            csvText = text;
-                            break;
-                        }
+                        responseText = await res.text();
                     }
                 } catch (err) {
-                    console.warn(`Fetch attempt failed for ${url}:`, err);
+                    console.warn('Direct Apps Script fetch failed:', err);
                 }
             }
 
-            if (csvText) {
-                if (window.Papa && typeof Papa.parse === 'function') {
-                    Papa.parse(csvText, {
-                        header: false,
-                        skipEmptyLines: 'greedy',
-                        complete: function (results) {
-                            if (results.data && results.data.length > 0) {
-                                if (syncStatus) {
-                                    syncStatus.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Synced ${results.data.length.toLocaleString()} Rows`;
-                                    syncStatus.className = 'text-emerald-400 flex items-center gap-1';
-                                }
-                                processParsedData(results.data);
-                            }
-                        }
-                    });
+            if (responseText && responseText.length > 20) {
+                let dataRows = null;
+                try {
+                    dataRows = JSON.parse(responseText);
+                } catch(e) {
+                    if (window.Papa && typeof Papa.parse === 'function') {
+                        const parsed = Papa.parse(responseText, { header: false, skipEmptyLines: 'greedy' });
+                        dataRows = parsed.data;
+                    }
                 }
-            } else {
-                if (syncStatus) {
-                    syncStatus.innerHTML = '<span class="w-2 h-2 rounded-full bg-red-500"></span> Using Offline Data Cache';
-                    syncStatus.className = 'text-red-400 flex items-center gap-1';
+
+                if (dataRows && Array.isArray(dataRows) && dataRows.length > 0) {
+                    if (syncStatus) {
+                        syncStatus.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Synced ${dataRows.length.toLocaleString()} Rows`;
+                        syncStatus.className = 'text-emerald-400 flex items-center gap-1';
+                    }
+                    processParsedData(dataRows);
+                    return;
                 }
+            }
+
+            if (syncStatus) {
+                syncStatus.innerHTML = '<span class="w-2 h-2 rounded-full bg-red-500"></span> Sync Failed (Check Proxy / Permissions)';
+                syncStatus.className = 'text-red-400 flex items-center gap-1';
             }
         }
 
@@ -667,9 +811,9 @@
             if (!dataRows || !Array.isArray(dataRows) || dataRows.length === 0) return;
 
             let headerIdx = -1;
-            for (let r = 0; r < Math.min(15, dataRows.length); r++) {
+            for (let r = 0; r < Math.min(25, dataRows.length); r++) {
                 const row = (dataRows[r] || []).map(c => clean(c).toUpperCase());
-                if (row.includes('PLAID') || row.includes('LOOKUP') || row.includes('CATEGORY') || row.includes('APPROVAL STATUS') || row.includes('SITE NAME')) {
+                if (row.some(c => c.includes('PLAID') || c.includes('LOOKUP') || c.includes('CATEGORY') || c.includes('APPROVAL') || c.includes('SITE'))) {
                     headerIdx = r;
                     break;
                 }
@@ -690,6 +834,12 @@
             const colStatus = hRow.findIndex(c => c.includes('APPROVAL') || c.includes('STATUS') || c.includes('MILESTONE'));
             const colTech = hRow.findIndex(c => c.includes('BAND') || c.includes('TECH') || c.includes('SYSTEM'));
 
+            // Target Column Y ("Rejection Reasons") and Column X ("Remarks Category")
+            let colRejReason = hRow.findIndex(c => c.includes('REJECTION REASONS') || c === 'REJECTION REASONS' || c === 'REJECTION REASON');
+            if (colRejReason === -1) {
+                colRejReason = hRow.findIndex(c => c.includes('REMARKS CATEGORY') || c.includes('REMARK') || c.includes('REASON') || c.includes('DEFICIENCY'));
+            }
+
             const colSubmit1 = hRow.findIndex(c => (c.includes('SUBMIT') || c.includes('DATE SUBMIT')) && !c.includes('RE-') && !c.includes('RESUB') && !c.includes('1ST RE') && !c.includes('2ND RE'));
             const colReject1 = hRow.findIndex(c => c.includes('1ST') && (c.includes('REJECT') || c.includes('REVIS')));
             const colSubmit2 = hRow.findIndex(c => c.includes('1ST') && (c.includes('RE-SUBMIT') || c.includes('RESUBMIT')));
@@ -704,6 +854,9 @@
                 const row = dataRows[i];
                 if (!row || !Array.isArray(row) || row.length === 0) continue;
 
+                const rowHasData = row.some(cell => clean(cell) !== '');
+                if (!rowHasData) continue;
+
                 const lookupVal = clean(colLookup !== -1 ? row[colLookup] : '');
                 const siteNameVal = clean(colSiteName !== -1 ? row[colSiteName] : '').toUpperCase().trim();
                 const plaidVal = clean(colPlaid !== -1 ? row[colPlaid] : '').toUpperCase().trim();
@@ -715,6 +868,8 @@
                 const rawStatus = clean(colStatus !== -1 ? row[colStatus] : '');
                 const techVal = clean(colTech !== -1 ? row[colTech] : '');
 
+                const rawRejReason = clean(colRejReason !== -1 ? row[colRejReason] : (row[24] || row[23] || ''));
+
                 const swapDateObj = parseFlexibleDate(colSwapDate !== -1 ? row[colSwapDate] : '');
                 const trfsDateObj = parseFlexibleDate(colTrfsDate !== -1 ? row[colTrfsDate] : '');
 
@@ -725,8 +880,8 @@
                 const submit3DateObj = parseFlexibleDate(colSubmit3 !== -1 ? row[colSubmit3] : '');
                 let approvedDateObj = parseFlexibleDate(colApproved !== -1 ? row[colApproved] : '');
 
-                const finalLookup = lookupVal || (siteNameVal || plaidVal ? `${siteNameVal || plaidVal}_SITE` : `ROW_${i}`);
-                if (!finalLookup || provVal.includes('GRAND TOTAL')) continue;
+                const finalLookup = lookupVal || (siteNameVal || plaidVal ? `${siteNameVal || plaidVal}_${i}` : `ROW_${i + 1}`);
+                if (provVal.includes('GRAND TOTAL') || provVal.includes('TOTALS')) continue;
 
                 const statusUpper = rawStatus.toUpperCase();
                 let milestone = 'NOT YET TRFS';
@@ -771,6 +926,7 @@
                     Submit3Date: submit3DateObj,
                     ApprovedDate: approvedDateObj,
                     RawStatus: rawStatus,
+                    RejectionReason: rawRejReason,
                     Milestone: milestone,
                     IsForReview: isForReview,
                     IsResubmit: isResubmit,
@@ -893,19 +1049,18 @@
 
         function renderSiteSsvTable() {
             const data = getFilteredDataset();
-            const groupKey = document.getElementById('site-agg-group').value; // 'SITENAME', 'CLUSTER', 'TOWN', 'PROVINCE'
-            const sortMode = document.getElementById('site-sort-mode').value; // 'DEFAULT', 'DESC', 'ASC'
+            const groupKey = document.getElementById('site-agg-group').value;
+            const sortMode = document.getElementById('site-sort-mode').value;
 
             const headTr = document.getElementById('site-ssv-table-head');
 
-            // Dynamic Table Headers Construction
             let headHtml = `<th class="p-3 w-12 text-center">#</th>`;
 
             if (groupKey === 'CLUSTER') {
                 headHtml += `<th class="p-3 font-mono text-blue-400">Cluster Name</th>`;
             } else if (groupKey === 'TOWN') {
                 headHtml += `<th class="p-3 font-mono text-blue-400">Town / City</th>`;
-                headHtml += `<th class="p-3">Province</th>`; // Retained for Town segregation across provinces
+                headHtml += `<th class="p-3">Province</th>`;
             } else if (groupKey === 'PROVINCE') {
                 headHtml += `<th class="p-3 font-mono text-blue-400">Province</th>`;
             } else {
@@ -1002,7 +1157,6 @@
                 };
             });
 
-            // Apply Sorting Mechanism
             if (sortMode === 'DESC') {
                 processedGroups.sort((a, b) => b.PctNum - a.PctNum || b.UnitTotal - a.UnitTotal);
             } else if (sortMode === 'ASC') {
@@ -1137,7 +1291,106 @@
             renderTrendChart();
             renderSiteSsvTable();
             renderAgingChart();
+            renderRejectionClassification();
             renderMasterTable();
+        }
+
+        function renderRejectionClassification() {
+            const data = getFilteredDataset();
+
+            // High-Level Category Counters
+            let c1 = 0, c2 = 0, c3 = 0, c4 = 0, c5 = 0, c6 = 0, cBlank = 0;
+            let totalDeficienciesCount = 0;
+            let rejectedMilestoneCount = 0;
+            let resubmitMilestoneCount = 0;
+
+            data.forEach(d => {
+                const milestoneUpper = (d.Milestone || '').toUpperCase();
+                const rawStatusUpper = (d.RawStatus || '').toUpperCase();
+
+                // STRICT UNIVERSE FILTERING: Only include "Rejected" or "Re-submit" approval milestones
+                const isRejected = milestoneUpper === 'REJECTED' || rawStatusUpper.includes('REJECT') || rawStatusUpper.includes('REVIS');
+                const isResubmit = (milestoneUpper === 'FOR GT REVIEW' && d.IsResubmit) || rawStatusUpper.includes('RE-SUBMIT') || rawStatusUpper.includes('RESUBMIT');
+
+                if (isRejected || isResubmit) {
+                    if (isRejected) rejectedMilestoneCount++;
+                    if (isResubmit) resubmitMilestoneCount++;
+
+                    const rejCell = d.RejectionReason || '';
+                    // Split multi-select chips in Column Y (commas, newlines, or semicolons)
+                    const entries = rejCell ? rejCell.split(/[\n,;]+/).map(e => e.trim()).filter(e => e.length > 0) : [];
+
+                    if (entries.length === 0) {
+                        // Count as NOT TAGGED YET (BLANK)
+                        cBlank++;
+                        totalDeficienciesCount++;
+                    } else {
+                        entries.forEach(entry => {
+                            totalDeficienciesCount++;
+                            const entryUpper = entry.toUpperCase();
+
+                            if (entryUpper.includes('DOCUMENTATION') || entryUpper.includes('SUBMISSION') || entryUpper.includes('PHOTO') || entryUpper.includes('ATTACH') || entryUpper.includes('INTERIM') || entryUpper.includes('LICENSE') || entryUpper.includes('POWER') || entryUpper.includes('AUDIT') || entryUpper.includes('JUSTIFICATION')) {
+                                c1++;
+                            } else if (entryUpper.includes('ACCURACY') || entryUpper.includes('DATA MISMATCH') || entryUpper.includes('CONFIGURATION MISMATCH') || entryUpper.includes('PCI ALIGNMENT') || entryUpper.includes('PARAMETER')) {
+                                c2++;
+                            } else if (entryUpper.includes('NETWORK PERFORMANCE') || entryUpper.includes('FURTHER OPTIMIZATION') || entryUpper.includes('SINR') || entryUpper.includes('RSRP') || entryUpper.includes('PRB') || entryUpper.includes('NEIGHBOR') || entryUpper.includes('FURTHER OPTI')) {
+                                c3++;
+                            } else if (entryUpper.includes('KPI') || entryUpper.includes('PERFORMANCE VALIDATION') || entryUpper.includes('DT KPI') || entryUpper.includes('RRC') || entryUpper.includes('SPEEDTEST') || entryUpper.includes('TRAFFIC')) {
+                                c4++;
+                            } else if (entryUpper.includes('RETEST') || entryUpper.includes('INCONCLUSIVE') || entryUpper.includes('RE-VALIDAT')) {
+                                c5++;
+                            } else if (entryUpper.includes('SITE CONFIGURATION') || entryUpper.includes('SWAP CORRECTIONS') || entryUpper.includes('SECTOR') || entryUpper.includes('MAPPING')) {
+                                c6++;
+                            } else {
+                                c1++;
+                            }
+                        });
+                    }
+                }
+            });
+
+            // Percentage Share Calculations
+            const calcPct = (cnt) => totalDeficienciesCount > 0 ? ((cnt / totalDeficienciesCount) * 100).toFixed(1) + '%' : '0.0%';
+
+            // Update Header Counts
+            document.getElementById('rej-ms-rejected-cnt').innerText = rejectedMilestoneCount.toLocaleString();
+            document.getElementById('rej-ms-resubmit-cnt').innerText = resubmitMilestoneCount.toLocaleString();
+            document.getElementById('rej-kpi-total-reasons').innerText = totalDeficienciesCount.toLocaleString();
+
+            // Update Category KPI Cards
+            document.getElementById('rej-kpi-c1').innerText = c1.toLocaleString();
+            document.getElementById('rej-kpi-c2').innerText = c2.toLocaleString();
+            document.getElementById('rej-kpi-c3').innerText = c3.toLocaleString();
+            document.getElementById('rej-kpi-c4').innerText = c4.toLocaleString();
+            document.getElementById('rej-kpi-c5').innerText = c5.toLocaleString();
+            document.getElementById('rej-kpi-c6').innerText = c6.toLocaleString();
+            document.getElementById('rej-kpi-blank').innerText = cBlank.toLocaleString();
+
+            document.getElementById('rej-kpi-c1-pct').innerText = `${calcPct(c1)} of total universe`;
+            document.getElementById('rej-kpi-c2-pct').innerText = `${calcPct(c2)} of total universe`;
+            document.getElementById('rej-kpi-c3-pct').innerText = `${calcPct(c3)} of total universe`;
+            document.getElementById('rej-kpi-c4-pct').innerText = `${calcPct(c4)} of total universe`;
+            document.getElementById('rej-kpi-c5-pct').innerText = `${calcPct(c5)} of total universe`;
+            document.getElementById('rej-kpi-c6-pct').innerText = `${calcPct(c6)} of total universe`;
+            document.getElementById('rej-kpi-blank-pct').innerText = `${calcPct(cBlank)} of total universe`;
+
+            // Update Classification Table Rows
+            document.getElementById('table-rej-cnt-blank').innerText = cBlank.toLocaleString();
+            document.getElementById('table-rej-share-blank').innerText = calcPct(cBlank);
+
+            document.getElementById('table-rej-cnt-c1').innerText = c1.toLocaleString();
+            document.getElementById('table-rej-cnt-c2').innerText = c2.toLocaleString();
+            document.getElementById('table-rej-cnt-c3').innerText = c3.toLocaleString();
+            document.getElementById('table-rej-cnt-c4').innerText = c4.toLocaleString();
+            document.getElementById('table-rej-cnt-c5').innerText = c5.toLocaleString();
+            document.getElementById('table-rej-cnt-c6').innerText = c6.toLocaleString();
+
+            document.getElementById('table-rej-share-c1').innerText = calcPct(c1);
+            document.getElementById('table-rej-share-c2').innerText = calcPct(c2);
+            document.getElementById('table-rej-share-c3').innerText = calcPct(c3);
+            document.getElementById('table-rej-share-c4').innerText = calcPct(c4);
+            document.getElementById('table-rej-share-c5').innerText = calcPct(c5);
+            document.getElementById('table-rej-share-c6').innerText = calcPct(c6);
         }
 
         function updateKPIs() {
