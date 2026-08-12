@@ -242,7 +242,7 @@
             </div>
         </div>
 
-        <!-- SUMMARY KPI CARDS (BEAUTIFIED & STRICT VERTICAL ALIGNMENT) -->
+        <!-- SUMMARY KPI CARDS -->
         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3.5">
             <div class="chart-card p-4 rounded-2xl border-l-4 border-l-blue-500 flex flex-col justify-between min-h-[165px] hover:border-slate-700 transition">
                 <div>
@@ -463,7 +463,6 @@
                     <p class="text-xs text-slate-400">Elapsed time from Swap Date to Chart Snapshot Date for non-TRFS sites</p>
                 </div>
 
-                <!-- UNIFIED TOGGLE BUTTON THAT CONTROLS BOTH GRAPH AND TABLE -->
                 <div class="flex items-center p-1 bg-slate-900 border border-slate-800 rounded-xl shadow-inner">
                     <button id="toggle-aging-logical" onclick="setAgingViewMode('LOGICAL')" class="px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-purple-600 text-white transition flex items-center gap-1.5 shadow-sm">
                         <i data-lucide="layers" class="w-3.5 h-3.5"></i> Logical Sites
@@ -990,11 +989,17 @@
                 const utc_days = Math.floor(serial - 25569);
                 const utc_value = utc_days * 86400;
                 const date_info = new Date(utc_value * 1000);
-                if (!isNaN(date_info.getTime())) return date_info;
+                if (!isNaN(date_info.getTime())) {
+                    date_info.setHours(0, 0, 0, 0);
+                    return date_info;
+                }
             }
 
             let d = new Date(str);
-            if (!isNaN(d.getTime())) return d;
+            if (!isNaN(d.getTime())) {
+                d.setHours(0, 0, 0, 0);
+                return d;
+            }
 
             const parts = str.split(/[\/\-\.\s]+/);
             if (parts.length >= 3) {
@@ -1011,7 +1016,10 @@
                             d = new Date(p3, p2 - 1, p1);
                         }
                     }
-                    if (!isNaN(d.getTime())) return d;
+                    if (!isNaN(d.getTime())) {
+                        d.setHours(0, 0, 0, 0);
+                        return d;
+                    }
                 }
             }
             return null;
@@ -1155,7 +1163,10 @@
 
                 if (statusUpper.includes('APPROVED') || statusUpper.includes('PASSED')) {
                     milestone = 'SSV APPROVED';
-                    if (!approvedDateObj) approvedDateObj = trfsDateObj || swapDateObj || new Date();
+                    if (!approvedDateObj) {
+                        approvedDateObj = trfsDateObj || swapDateObj;
+                        if (approvedDateObj) approvedDateObj.setHours(0, 0, 0, 0);
+                    }
                 } else if (statusUpper.includes('REVIEW') || statusUpper.includes('SUBMIT')) {
                     milestone = 'FOR GT REVIEW';
                     if (statusUpper.includes('RE-SUBMIT') || statusUpper.includes('RESUBMIT')) {
@@ -1489,6 +1500,7 @@
             const groupKey = document.getElementById('aging-agg-group').value;
             const headTr = document.getElementById('aging-table-head');
             const now = new Date();
+            now.setHours(0, 0, 0, 0);
 
             let headHtml = `<th class="p-3 w-12 text-center">#</th>`;
             if (groupKey === 'CLUSTER') {
@@ -1532,8 +1544,10 @@
                 }
 
                 let elapsed = 0;
-                if (d.SwapDate) {
-                    elapsed = Math.floor((now - d.SwapDate) / (1000 * 60 * 60 * 24));
+                if (d.SwapDate && d.SwapDate <= now) {
+                    const swapNorm = new Date(d.SwapDate);
+                    swapNorm.setHours(0, 0, 0, 0);
+                    elapsed = Math.floor((now - swapNorm) / (1000 * 60 * 60 * 24));
                 }
 
                 if (elapsed > 20) groupMap[keyVal].b20++;
@@ -1576,54 +1590,53 @@
         }
 
         function getLogicalSiteStatusOnDate(d, dt) {
-            if (d.Milestone === 'SSV APPROVED') {
-                const appDt = d.ApprovedDate || d.TrfsDate || d.SwapDate;
-                if (appDt && dt >= appDt) return 'SSV APPROVED';
-            }
-
-            const refDate = d.TrfsDate || d.SwapDate;
-            if (refDate && dt < refDate) {
+            // 1. Strict Check: If the site is explicitly flagged 'NOT YET TRFS' in master data, keep it 'NOT YET TRFS'
+            if (d.Milestone === 'NOT YET TRFS') {
                 return 'NOT YET TRFS';
             }
 
+            const evalDt = new Date(dt);
+            evalDt.setHours(0, 0, 0, 0);
+
+            // 2. Check TRFS threshold
+            const trfsDt = d.TrfsDate ? new Date(d.TrfsDate) : null;
+            if (trfsDt) trfsDt.setHours(0, 0, 0, 0);
+
+            if (!trfsDt || evalDt < trfsDt) {
+                return 'NOT YET TRFS';
+            }
+
+            // 3. Reconstruct timeline events STRICTLY based on event dates up to evalDt
             const events = [];
-            if (refDate && refDate <= dt) {
-                events.push({ date: refDate, status: 'ONGOING SSV', order: 1 });
-            }
-            if (d.Submit1Date && d.Submit1Date <= dt) {
-                events.push({ date: d.Submit1Date, status: 'FOR GT REVIEW', order: 2 });
-            }
-            if (d.Reject1Date && d.Reject1Date <= dt) {
-                events.push({ date: d.Reject1Date, status: 'REJECTED', order: 3 });
-            }
-            if (d.Submit2Date && d.Submit2Date <= dt) {
-                events.push({ date: d.Submit2Date, status: 'FOR GT REVIEW', order: 4 });
-            }
-            if (d.Reject2Date && d.Reject2Date <= dt) {
-                events.push({ date: d.Reject2Date, status: 'REJECTED', order: 5 });
-            }
-            if (d.Submit3Date && d.Submit3Date <= dt) {
-                events.push({ date: d.Submit3Date, status: 'FOR GT REVIEW', order: 6 });
-            }
-            if (d.ApprovedDate && d.ApprovedDate <= dt) {
-                events.push({ date: d.ApprovedDate, status: 'SSV APPROVED', order: 7 });
-            }
+            events.push({ date: trfsDt, status: 'ONGOING SSV', order: 1 });
 
-            if (events.length > 0) {
-                events.sort((a, b) => {
-                    if (a.date.getTime() !== b.date.getTime()) {
-                        return a.date.getTime() - b.date.getTime();
+            const checkAndPush = (dateVal, status, order) => {
+                if (dateVal) {
+                    const normDt = new Date(dateVal);
+                    normDt.setHours(0, 0, 0, 0);
+                    if (normDt <= evalDt) {
+                        events.push({ date: normDt, status, order });
                     }
-                    return a.order - b.order;
-                });
-                return events[events.length - 1].status;
-            }
+                }
+            };
 
-            if (!refDate || refDate <= dt) {
-                return d.Milestone;
-            }
+            checkAndPush(d.Submit1Date, 'FOR GT REVIEW', 2);
+            checkAndPush(d.Reject1Date, 'REJECTED', 3);
+            checkAndPush(d.Submit2Date, 'FOR GT REVIEW', 4);
+            checkAndPush(d.Reject2Date, 'REJECTED', 5);
+            checkAndPush(d.Submit3Date, 'FOR GT REVIEW', 6);
+            checkAndPush(d.ApprovedDate, 'SSV APPROVED', 7);
 
-            return 'NOT YET TRFS';
+            // Sort matched events by date then priority order
+            events.sort((a, b) => {
+                if (a.date.getTime() !== b.date.getTime()) {
+                    return a.date.getTime() - b.date.getTime();
+                }
+                return a.order - b.order;
+            });
+
+            // Return the milestone corresponding to the most recent event on/before evalDt
+            return events[events.length - 1].status;
         }
 
         function getPlaidStatus(items, dt = null) {
@@ -1637,7 +1650,8 @@
                 validItems = items.map(d => ({ ...d, EvaluatedMilestone: d.Milestone }));
             }
 
-            const now = dt || new Date();
+            const now = dt ? new Date(dt) : new Date();
+            now.setHours(0, 0, 0, 0);
             const statuses = validItems.map(d => d.EvaluatedMilestone);
 
             if (statuses.length > 0 && statuses.every(s => s === 'SSV APPROVED')) {
@@ -1651,9 +1665,11 @@
             if (statuses.includes('ONGOING SSV')) {
                 let maxDays = 0;
                 validItems.filter(d => d.EvaluatedMilestone === 'ONGOING SSV').forEach(d => {
-                    const refDt = d.TrfsDate || d.SwapDate;
+                    const refDt = d.TrfsDate;
                     if (refDt) {
-                        const days = (now - refDt) / (1000 * 60 * 60 * 24);
+                        const refNorm = new Date(refDt);
+                        refNorm.setHours(0, 0, 0, 0);
+                        const days = Math.floor((now - refNorm) / (1000 * 60 * 60 * 24));
                         if (days > maxDays) maxDays = days;
                     }
                 });
@@ -1910,7 +1926,6 @@
             renderTrendChart();
         }
 
-        // UNIFIED TOGGLE FUNCTION THAT UPDATES BOTH THE AGING GRAPH AND AGING BREAKDOWN TABLE
         function setAgingViewMode(mode) {
             agingViewMode = mode;
             document.getElementById('toggle-aging-logical').className = mode === 'LOGICAL' 
@@ -1957,7 +1972,6 @@
         function renderRejectionClassification() {
             const data = getFilteredDataset();
 
-            // Category Counters
             let c1 = 0, c2 = 0, c3 = 0, c4 = 0, c5 = 0, c6 = 0, cBlank = 0;
             let totalDeficienciesCount = 0;
             let rejectedMilestoneCount = 0;
@@ -1967,7 +1981,6 @@
                 const milestoneUpper = (d.Milestone || '').toUpperCase();
                 const rawStatusUpper = (d.RawStatus || '').toUpperCase();
 
-                // STRICT UNIVERSE FILTERING: Only include "Rejected" or "Re-submit" approval milestones
                 const isRejected = milestoneUpper === 'REJECTED' || rawStatusUpper.includes('REJECT') || rawStatusUpper.includes('REVIS');
                 const isResubmit = (milestoneUpper === 'FOR GT REVIEW' && d.IsResubmit) || rawStatusUpper.includes('RE-SUBMIT') || rawStatusUpper.includes('RESUBMIT');
 
@@ -2006,16 +2019,13 @@
                 }
             });
 
-            // Percentage Share Calculations
             const calcPctNum = (cnt) => totalDeficienciesCount > 0 ? (cnt / totalDeficienciesCount) * 100 : 0;
             const calcPct = (cnt) => calcPctNum(cnt).toFixed(1) + '%';
 
-            // Update Header Counts
             document.getElementById('rej-ms-rejected-cnt').innerText = rejectedMilestoneCount.toLocaleString();
             document.getElementById('rej-ms-resubmit-cnt').innerText = resubmitMilestoneCount.toLocaleString();
             document.getElementById('rej-kpi-total-reasons').innerText = totalDeficienciesCount.toLocaleString();
 
-            // Update Category KPI Cards & Active Card Styling
             const updateCard = (cardId, val) => {
                 const el = document.getElementById(cardId);
                 if (el) {
@@ -2050,7 +2060,6 @@
             document.getElementById('rej-kpi-c6-pct').innerText = `${calcPct(c6)} of total`;
             document.getElementById('rej-kpi-blank-pct').innerText = `${calcPct(cBlank)} of total`;
 
-            // Update Progress Bars & Table Shares
             const setBarWidth = (barId, val) => {
                 const el = document.getElementById(barId);
                 if (el) el.style.width = `${Math.min(100, Math.max(0, calcPctNum(val)))}%`;
@@ -2093,6 +2102,7 @@
         function updateKPIs() {
             const data = getFilteredDataset();
             const now = new Date();
+            now.setHours(0, 0, 0, 0); // Normalized start of current day
 
             let totalSites = 0;
             let approved = 0, forReview = 0, resubmit = 0, rejected = 0;
@@ -2107,9 +2117,10 @@
                         if (d.IsResubmit) resubmit++;
                         else forReview++;
                     } else if (d.Milestone === 'ONGOING SSV') {
-                        const refDt = d.TrfsDate || d.SwapDate;
-                        if (refDt) {
-                            const days = (now - refDt) / (1000 * 60 * 60 * 24);
+                        if (d.TrfsDate) {
+                            const trfsNorm = new Date(d.TrfsDate);
+                            trfsNorm.setHours(0, 0, 0, 0);
+                            const days = Math.floor((now - trfsNorm) / (1000 * 60 * 60 * 24));
                             if (days > 21) ongoingBeyond++;
                             else ongoingWithin++;
                         } else {
@@ -2131,7 +2142,7 @@
                 totalSites = Object.keys(siteMap).length;
 
                 Object.values(siteMap).forEach(items => {
-                    const status = getPlaidStatus(items);
+                    const status = getPlaidStatus(items, now);
 
                     if (status === 'SSV APPROVED') approved++;
                     else if (status === 'NOT YET TRFS') notTrfs++;
@@ -2174,7 +2185,7 @@
                 });
 
                 Object.values(siteMap).forEach(items => {
-                    const status = getPlaidStatus(items);
+                    const status = getPlaidStatus(items, now);
                     if (status === 'NOT YET TRFS') {
                         let bestRep = items[0];
                         items.forEach(d => {
@@ -2189,12 +2200,14 @@
 
             let u2 = 0, d2_10 = 0, d10_20 = 0, b20 = 0;
             nonTrfsItems.forEach(d => {
-                if (d.SwapDate) {
-                    const days = Math.floor((now - d.SwapDate) / (1000 * 60 * 60 * 24));
-                    if (days <= 2) u2++;
-                    else if (days <= 10) d2_10++;
-                    else if (days <= 20) d10_20++;
-                    else b20++;
+                if (d.SwapDate && d.SwapDate <= now) {
+                    const swapNorm = new Date(d.SwapDate);
+                    swapNorm.setHours(0, 0, 0, 0);
+                    const days = Math.floor((now - swapNorm) / (1000 * 60 * 60 * 24));
+                    if (days > 20) b20++;
+                    else if (days > 10) d10_20++;
+                    else if (days > 2) d2_10++;
+                    else u2++;
                 } else {
                     u2++;
                 }
@@ -2314,7 +2327,8 @@
             ];
 
             aggItems.forEach(item => {
-                const dt = item.date;
+                const dt = new Date(item.date);
+                dt.setHours(0, 0, 0, 0); // Normalized start of day
                 const label = item.label;
                 let app = 0, rej = 0, rev = 0, ongBeyond = 0, ongWithin = 0;
 
@@ -2323,13 +2337,14 @@
                         const statusOnDt = getLogicalSiteStatusOnDate(d, dt);
                         if (statusOnDt === 'NOT YET TRFS') return;
 
-                        const refDate = d.TrfsDate || d.SwapDate;
                         if (statusOnDt === 'SSV APPROVED') app++;
                         else if (statusOnDt === 'REJECTED') rej++;
                         else if (statusOnDt === 'FOR GT REVIEW') rev++;
                         else if (statusOnDt === 'ONGOING SSV') {
-                            if (refDate) {
-                                const days = (dt - refDate) / (1000 * 60 * 60 * 24);
+                            if (d.TrfsDate) {
+                                const refNorm = new Date(d.TrfsDate);
+                                refNorm.setHours(0, 0, 0, 0);
+                                const days = Math.floor((dt - refNorm) / (1000 * 60 * 60 * 24));
                                 if (days > 21) ongBeyond++;
                                 else ongWithin++;
                             } else {
@@ -2428,13 +2443,16 @@
             ];
 
             aggItems.forEach(item => {
-                const dt = item.date;
+                const dt = new Date(item.date);
+                dt.setHours(0, 0, 0, 0);
                 const label = item.label;
                 let b20 = 0, d10_20 = 0, d2_10 = 0, u2 = 0;
 
                 nonTrfs.forEach(d => {
                     if (d.SwapDate && d.SwapDate <= dt) {
-                        const elapsed = Math.floor((dt - d.SwapDate) / (1000 * 60 * 60 * 24));
+                        const swapNorm = new Date(d.SwapDate);
+                        swapNorm.setHours(0, 0, 0, 0);
+                        const elapsed = Math.floor((dt - swapNorm) / (1000 * 60 * 60 * 24));
                         if (elapsed > 20) b20++;
                         else if (elapsed > 10) d10_20++;
                         else if (elapsed > 2) d2_10++;
@@ -2490,6 +2508,7 @@
             }
 
             const now = new Date();
+            now.setHours(0, 0, 0, 0);
             const total = data.length;
             const app = data.filter(d => d.Milestone === 'SSV APPROVED').length;
             const rev = data.filter(d => d.Milestone === 'FOR GT REVIEW').length;
@@ -2499,9 +2518,11 @@
             let ongW = 0, ongB = 0;
             data.forEach(d => {
                 if (d.Milestone === 'ONGOING SSV') {
-                    const refDt = d.TrfsDate || d.SwapDate;
+                    const refDt = d.TrfsDate;
                     if (refDt) {
-                        const days = (now - refDt) / (1000 * 60 * 60 * 24);
+                        const refNorm = new Date(refDt);
+                        refNorm.setHours(0, 0, 0, 0);
+                        const days = Math.floor((now - refNorm) / (1000 * 60 * 60 * 24));
                         if (days > 21) ongB++;
                         else ongW++;
                     } else {
