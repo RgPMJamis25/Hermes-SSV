@@ -24,7 +24,6 @@
     <script src="https://unpkg.com/lucide@latest"></script>
 
     <style>
-        /* BASE DARK THEME CARDS */
         .chart-card {
             background: rgba(30, 41, 59, 0.75);
             backdrop-filter: blur(16px);
@@ -32,7 +31,6 @@
             box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.5);
         }
 
-        /* FULL COMPREHENSIVE LIGHT MODE OVERRIDES & HIGH-CONTRAST TEXT MAPPINGS */
         html:not(.dark), html:not(.dark) body {
             background-color: #f8fafc !important;
             color: #0f172a !important;
@@ -78,85 +76,65 @@
             color: #0f172a !important;
         }
 
-        /* HIGH-CONTRAST ACCENT COLORS FOR LIGHT MODE */
         html:not(.dark) .text-blue-300,
-        html:not(.dark) .text-blue-400 {
-            color: #1d4ed8 !important; /* Deep Navy Blue */
-        }
-
+        html:not(.dark) .text-blue-400 { color: #1d4ed8 !important; }
         html:not(.dark) .text-emerald-400,
-        html:not(.dark) .text-emerald-500 {
-            color: #047857 !important; /* Dark Forest Green */
-        }
-
+        html:not(.dark) .text-emerald-500 { color: #047857 !important; }
+        html:not(.dark) .text-teal-400,
+        html:not(.dark) .text-teal-500 { color: #0f766e !important; }
         html:not(.dark) .text-amber-300,
         html:not(.dark) .text-amber-400,
-        html:not(.dark) .text-amber-500 {
-            color: #b45309 !important; /* Deep Dark Amber / Ochre */
-        }
-
+        html:not(.dark) .text-amber-500 { color: #b45309 !important; }
         html:not(.dark) .text-rose-300,
         html:not(.dark) .text-rose-400,
         html:not(.dark) .text-rose-500,
         html:not(.dark) .text-red-400,
-        html:not(.dark) .text-red-500 {
-            color: #b91c1c !important; /* Deep Dark Red */
-        }
-
+        html:not(.dark) .text-red-500 { color: #b91c1c !important; }
         html:not(.dark) .text-purple-300,
         html:not(.dark) .text-purple-400,
-        html:not(.dark) .text-purple-300\/80 {
-            color: #6b21a8 !important; /* Dark Purple */
-        }
+        html:not(.dark) .text-purple-300\/80 { color: #6b21a8 !important; }
 
-        /* BADGES & PILL HIGH CONTRAST ADJUSTMENTS */
         html:not(.dark) .bg-emerald-500\/20 {
             background-color: #d1fae5 !important;
             color: #065f46 !important;
             border-color: #a7f3d0 !important;
         }
-
+        html:not(.dark) .bg-teal-500\/20 {
+            background-color: #ccfbf1 !important;
+            color: #115e59 !important;
+            border-color: #99f6e4 !important;
+        }
         html:not(.dark) .bg-amber-500\/20 {
             background-color: #fef3c7 !important;
             color: #92400e !important;
             border-color: #fde68a !important;
         }
-
         html:not(.dark) .bg-red-500\/20, html:not(.dark) .bg-rose-500\/20 {
             background-color: #fee2e2 !important;
             color: #991b1b !important;
             border-color: #fca5a5 !important;
         }
-
         html:not(.dark) .bg-blue-500\/20 {
             background-color: #dbeafe !important;
             color: #1e40af !important;
             border-color: #bfdbfe !important;
         }
 
-        /* STICKY TABLE HEADERS & INNER CONTAINERS LIGHT MODE FIX */
         html:not(.dark) thead {
             background-color: #e2e8f0 !important;
             color: #0f172a !important;
         }
-
         html:not(.dark) thead tr th {
             color: #0f172a !important;
             font-weight: 700 !important;
         }
-
-        html:not(.dark) tbody tr:hover {
-            background-color: #e2e8f0 !important;
-        }
-
-        html:not(.dark) select,
-        html:not(.dark) input[type="text"] {
+        html:not(.dark) tbody tr:hover { background-color: #e2e8f0 !important; }
+        html:not(.dark) select, html:not(.dark) input[type="text"] {
             background-color: #ffffff !important;
             color: #0f172a !important;
             border-color: #cbd5e1 !important;
         }
 
-        /* SCROLLBAR ADJUSTMENTS */
         ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { background: #090d16; }
         ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 4px; }
@@ -188,7 +166,6 @@
                 </div>
             </div>
 
-            <!-- HEADER CONTROLS: LIGHT MODE TOGGLE + SYNC DATA -->
             <div class="flex items-center gap-3">
                 <button onclick="toggleTheme()" class="p-2 bg-slate-800 hover:bg-slate-700 dark:bg-slate-900 dark:hover:bg-slate-800 text-amber-400 dark:text-blue-400 rounded-xl border border-slate-700/80 transition-all duration-200 shadow-sm flex items-center gap-2 text-xs font-semibold">
                     <i id="theme-icon" data-lucide="sun" class="w-4 h-4"></i>
@@ -220,7 +197,6 @@
                     <option value="ALL">All Vendors</option>
                 </select>
 
-                <!-- PROVINCE FILTER DEFAULT SET TO ALL PROVINCES -->
                 <select id="province-filter" onchange="onProvinceChange()" class="bg-slate-900/90 text-xs text-slate-200 border border-slate-700/80 rounded-xl px-3.5 py-2 focus:ring-2 focus:ring-blue-500 outline-none transition shadow-sm">
                     <option value="ALL" selected>All Provinces</option>
                 </select>
@@ -243,38 +219,51 @@
         </div>
 
         <!-- SUMMARY KPI CARDS -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3.5">
-            <div class="chart-card p-4 rounded-2xl border-l-4 border-l-blue-500 flex flex-col justify-between min-h-[165px] hover:border-slate-700 transition">
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
+            <div class="chart-card p-3.5 rounded-2xl border-l-4 border-l-blue-500 flex flex-col justify-between min-h-[160px]">
                 <div>
                     <div class="flex items-start justify-between text-slate-400 text-xs h-9">
                         <span id="kpi-total-title" class="font-bold uppercase tracking-wider text-[10px] leading-tight">TOTAL LOGICAL SITES</span>
                         <i data-lucide="layers" class="w-4 h-4 text-blue-400 shrink-0 ml-1"></i>
                     </div>
-                    <div id="kpi-total" class="text-3xl font-black text-blue-400 mt-1">0</div>
+                    <div id="kpi-total" class="text-2xl font-black text-blue-400 mt-1">0</div>
                 </div>
-                <div id="kpi-total-sub" class="pt-2 border-t border-slate-800/80 text-[11px] text-slate-400 truncate">Unique Lookup Entries</div>
+                <div id="kpi-total-sub" class="pt-2 border-t border-slate-800/80 text-[10px] text-slate-400 truncate">Unique Lookup Entries</div>
             </div>
 
-            <div class="chart-card p-4 rounded-2xl border-l-4 border-l-emerald-500 flex flex-col justify-between min-h-[165px] hover:border-slate-700 transition">
+            <div class="chart-card p-3.5 rounded-2xl border-l-4 border-l-emerald-500 flex flex-col justify-between min-h-[160px]">
                 <div>
                     <div class="flex items-start justify-between text-slate-400 text-xs h-9">
                         <span class="font-bold uppercase tracking-wider text-[10px] leading-tight">SSV APPROVED</span>
                         <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-500 shrink-0 ml-1"></i>
                     </div>
-                    <div id="kpi-approved" class="text-3xl font-black text-emerald-400 mt-1">0</div>
+                    <div id="kpi-approved" class="text-2xl font-black text-emerald-400 mt-1">0</div>
                 </div>
-                <div class="pt-2 border-t border-slate-800/80 text-[11px] text-emerald-400 font-bold truncate">
+                <div class="pt-2 border-t border-slate-800/80 text-[10px] text-emerald-400 font-bold truncate">
                     <span id="kpi-approved-pct">0.0% of total</span>
                 </div>
             </div>
 
-            <div class="chart-card p-4 rounded-2xl border-l-4 border-l-blue-500 flex flex-col justify-between min-h-[165px] hover:border-slate-700 transition">
+            <div class="chart-card p-3.5 rounded-2xl border-l-4 border-l-teal-500 flex flex-col justify-between min-h-[160px]">
+                <div>
+                    <div class="flex items-start justify-between text-slate-400 text-xs h-9">
+                        <span class="font-bold uppercase tracking-wider text-[10px] leading-tight">PARTIALLY APPROVED</span>
+                        <i data-lucide="check-square" class="w-4 h-4 text-teal-400 shrink-0 ml-1"></i>
+                    </div>
+                    <div id="kpi-partially-approved" class="text-2xl font-black text-teal-400 mt-1">0</div>
+                </div>
+                <div class="pt-2 border-t border-slate-800/80 text-[10px] text-teal-400 font-bold truncate">
+                    <span id="kpi-partially-approved-pct">0.0% of total</span>
+                </div>
+            </div>
+
+            <div class="chart-card p-3.5 rounded-2xl border-l-4 border-l-blue-500 flex flex-col justify-between min-h-[160px]">
                 <div>
                     <div class="flex items-start justify-between text-slate-400 text-xs h-9">
                         <span class="font-bold uppercase tracking-wider text-[10px] leading-tight">FOR GT REVIEW</span>
                         <i data-lucide="clock" class="w-4 h-4 text-blue-500 shrink-0 ml-1"></i>
                     </div>
-                    <div id="kpi-review" class="text-3xl font-black text-blue-400 mt-1">0</div>
+                    <div id="kpi-review" class="text-2xl font-black text-blue-400 mt-1">0</div>
                 </div>
                 <div class="pt-2 border-t border-slate-800/80 text-[10px] text-slate-300 flex items-center justify-between truncate">
                     <span>Review: <strong id="kpi-for-review-sub" class="text-blue-400">0</strong></span>
@@ -282,55 +271,49 @@
                 </div>
             </div>
 
-            <div class="chart-card p-4 rounded-2xl border-l-4 border-l-amber-500 flex flex-col justify-between min-h-[165px] hover:border-slate-700 transition">
+            <div class="chart-card p-3.5 rounded-2xl border-l-4 border-l-amber-500 flex flex-col justify-between min-h-[160px]">
                 <div>
                     <div class="flex items-start justify-between text-slate-400 text-xs h-9">
                         <span class="font-bold uppercase tracking-wider text-[10px] leading-tight">ONGOING WITHIN SLA</span>
                         <i data-lucide="alert-triangle" class="w-4 h-4 text-amber-500 shrink-0 ml-1"></i>
                     </div>
-                    <div id="kpi-ongoing-within" class="text-3xl font-black text-amber-400 mt-1">0</div>
+                    <div id="kpi-ongoing-within" class="text-2xl font-black text-amber-400 mt-1">0</div>
                 </div>
-                <div class="pt-2 border-t border-slate-800/80 text-[11px] text-slate-400 truncate">
-                    &le; 21 Days from TRFS
-                </div>
+                <div class="pt-2 border-t border-slate-800/80 text-[10px] text-slate-400 truncate">&le; 21 Days from TRFS</div>
             </div>
 
-            <div class="chart-card p-4 rounded-2xl border-l-4 border-l-red-500 flex flex-col justify-between min-h-[165px] hover:border-slate-700 transition">
+            <div class="chart-card p-3.5 rounded-2xl border-l-4 border-l-red-500 flex flex-col justify-between min-h-[160px]">
                 <div>
                     <div class="flex items-start justify-between text-slate-400 text-xs h-9">
                         <span class="font-bold uppercase tracking-wider text-[10px] leading-tight">ONGOING BEYOND SLA</span>
                         <i data-lucide="alert-circle" class="w-4 h-4 text-red-500 shrink-0 ml-1"></i>
                     </div>
-                    <div id="kpi-ongoing-beyond" class="text-3xl font-black text-red-400 mt-1">0</div>
+                    <div id="kpi-ongoing-beyond" class="text-2xl font-black text-red-400 mt-1">0</div>
                 </div>
-                <div class="pt-2 border-t border-slate-800/80 text-[11px] text-slate-400 truncate">
-                    &gt; 21 Days from TRFS
-                </div>
+                <div class="pt-2 border-t border-slate-800/80 text-[10px] text-slate-400 truncate">&gt; 21 Days from TRFS</div>
             </div>
 
-            <div class="chart-card p-4 rounded-2xl border-l-4 border-l-orange-500 flex flex-col justify-between min-h-[165px] hover:border-slate-700 transition">
+            <div class="chart-card p-3.5 rounded-2xl border-l-4 border-l-orange-500 flex flex-col justify-between min-h-[160px]">
                 <div>
                     <div class="flex items-start justify-between text-slate-400 text-xs h-9">
                         <span class="font-bold uppercase tracking-wider text-[10px] leading-tight">REJECTED / REVISION</span>
                         <i data-lucide="x-circle" class="w-4 h-4 text-orange-500 shrink-0 ml-1"></i>
                     </div>
-                    <div id="kpi-rejected" class="text-3xl font-black text-orange-400 mt-1">0</div>
+                    <div id="kpi-rejected" class="text-2xl font-black text-orange-400 mt-1">0</div>
                 </div>
-                <div class="pt-2 border-t border-slate-800/80 text-[11px] text-slate-400 truncate">
-                    Requires Re-submission
-                </div>
+                <div class="pt-2 border-t border-slate-800/80 text-[10px] text-slate-400 truncate">Requires Re-submission</div>
             </div>
 
-            <div class="chart-card p-4 rounded-2xl border-l-4 border-l-purple-500 flex flex-col justify-between min-h-[165px] hover:border-slate-700 transition">
+            <div class="chart-card p-3.5 rounded-2xl border-l-4 border-l-purple-500 flex flex-col justify-between min-h-[160px]">
                 <div>
                     <div class="flex items-start justify-between text-slate-400 text-xs h-9">
                         <span class="font-bold uppercase tracking-wider text-[10px] leading-tight">NOT YET TRFS</span>
                         <i data-lucide="calendar" class="w-4 h-4 text-purple-400 shrink-0 ml-1"></i>
                     </div>
-                    <div id="kpi-not-trfs" class="text-3xl font-black text-purple-300 mt-1">0</div>
+                    <div id="kpi-not-trfs" class="text-2xl font-black text-purple-300 mt-1">0</div>
                 </div>
-                <div class="pt-2 border-t border-slate-800/80 text-[11px] text-purple-400 font-semibold truncate">
-                    Pending Cutover / TRFS
+                <div class="pt-2 border-t border-slate-800/80 text-[10px] text-purple-400 font-semibold truncate">
+                    <span id="kpi-not-trfs-pct">0.0% of total</span>
                 </div>
             </div>
         </div>
@@ -340,17 +323,16 @@
             <div class="flex flex-wrap items-center justify-between gap-4 border-b border-slate-800/80 pb-3">
                 <div>
                     <h2 class="font-bold text-base text-slate-100 flex items-center gap-2">
-                        <i data-lucide="bar-chart-3" class="w-5 h-5 text-blue-400"></i>
-                        HERMES SSV PROGRESS (T8)
+                        <i data-lucide="bar-chart-3" class="w-5 h-5 text-blue-400"></i> HERMES SSV PROGRESS (T8)
                     </h2>
-                    <p class="text-xs text-slate-400">Stacked Bar Chart | Tagged by final approved date for 100% approved unique/logical sites</p>
+                    <p class="text-xs text-slate-400">Stacked Bar Chart | Tagged by status progression over time</p>
                 </div>
 
                 <div class="flex items-center p-1 bg-slate-900 border border-slate-800 rounded-xl shadow-inner">
-                    <button id="toggle-progress-logical" onclick="setProgressViewMode('LOGICAL')" class="px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-blue-600 text-white transition flex items-center gap-1.5 shadow-sm">
+                    <button id="toggle-progress-logical" onclick="setProgressViewMode('LOGICAL')" class="px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-blue-600 text-white flex items-center gap-1.5 shadow-sm">
                         <i data-lucide="layers" class="w-3.5 h-3.5"></i> Logical Sites
                     </button>
-                    <button id="toggle-progress-plaid" onclick="setProgressViewMode('PLAID')" class="px-3.5 py-1.5 rounded-lg text-xs font-semibold text-slate-400 hover:text-white transition flex items-center gap-1.5">
+                    <button id="toggle-progress-plaid" onclick="setProgressViewMode('PLAID')" class="px-3.5 py-1.5 rounded-lg text-xs font-semibold text-slate-400 hover:text-white flex items-center gap-1.5">
                         <i data-lucide="map-pin" class="w-3.5 h-3.5"></i> Physical Sites (Site Name)
                     </button>
                 </div>
@@ -359,13 +341,12 @@
             <div id="trend-chart" class="w-full h-[380px]"></div>
         </div>
 
-        <!-- SITE & MILESTONE BOTTLENECK AGGREGATION WITH MULTI-SELECT CHECKBOX SEARCH -->
+        <!-- SITE & MILESTONE BOTTLENECK AGGREGATION -->
         <div class="chart-card p-5 rounded-2xl space-y-4 border-l-4 border-l-emerald-500 border border-slate-800/80">
             <div class="flex flex-wrap items-center justify-between gap-4 border-b border-slate-800/80 pb-4">
                 <div>
                     <h2 class="font-bold text-base text-slate-100 flex items-center gap-2">
-                        <i data-lucide="check-square" class="w-5 h-5 text-emerald-400"></i>
-                        Site & Milestone Bottleneck Aggregation
+                        <i data-lucide="check-square" class="w-5 h-5 text-emerald-400"></i> Site & Milestone Bottleneck Aggregation
                     </h2>
                     <p class="text-xs text-slate-400 mt-0.5">Filter multiple specific sites, towns, or provinces dynamically via checkbox selection</p>
                 </div>
@@ -373,7 +354,7 @@
                 <div class="flex flex-wrap items-center gap-3">
                     <div class="flex items-center gap-2">
                         <span class="text-xs text-slate-400 font-medium">Group Row By:</span>
-                        <select id="site-agg-group" onchange="onSiteAggGroupChange()" class="bg-slate-900 text-xs font-bold text-emerald-400 border border-slate-700/80 rounded-xl px-3 py-1.5 outline-none focus:ring-2 focus:ring-emerald-500 shadow-sm">
+                        <select id="site-agg-group" onchange="onSiteAggGroupChange()" class="bg-slate-900 text-xs font-bold text-emerald-400 border border-slate-700/80 rounded-xl px-3 py-1.5 outline-none focus:ring-2 focus:ring-emerald-500">
                             <option value="SITENAME">Physical Site Name</option>
                             <option value="CLUSTER">Cluster Name</option>
                             <option value="TOWN">Town / City</option>
@@ -381,9 +362,8 @@
                         </select>
                     </div>
 
-                    <!-- DYNAMIC MULTI-SELECT CHECKBOX SEARCH DROPDOWN -->
                     <div class="relative inline-block text-left">
-                        <button onclick="toggleBottleneckSearchMenu()" class="bg-slate-900 text-xs font-semibold text-slate-200 border border-slate-700/80 rounded-xl px-3.5 py-1.5 flex items-center gap-2 shadow-sm hover:border-emerald-500 transition">
+                        <button onclick="toggleBottleneckSearchMenu()" class="bg-slate-900 text-xs font-semibold text-slate-200 border border-slate-700/80 rounded-xl px-3.5 py-1.5 flex items-center gap-2 shadow-sm hover:border-emerald-500">
                             <i data-lucide="search" class="w-3.5 h-3.5 text-emerald-400"></i>
                             <span id="bottleneck-filter-label">Filter Items (All Selected)</span>
                             <i data-lucide="chevron-down" class="w-3.5 h-3.5 text-slate-400"></i>
@@ -400,22 +380,20 @@
                                 </select>
                             </div>
 
-                            <input type="text" id="bottleneck-search-input" oninput="filterBottleneckCheckboxList()" placeholder="Type to search items..." class="w-full bg-slate-950 text-xs text-slate-200 border border-slate-800 rounded-lg px-3 py-1.5 outline-none focus:ring-1 focus:ring-emerald-500">
+                            <input type="text" id="bottleneck-search-input" oninput="filterBottleneckCheckboxList()" placeholder="Type to search items..." class="w-full bg-slate-950 text-xs text-slate-200 border border-slate-800 rounded-lg px-3 py-1.5 outline-none">
 
                             <div class="flex items-center justify-between text-[11px] pt-1 border-t border-slate-800">
                                 <button onclick="selectAllBottleneckCheckboxes(true)" class="text-emerald-400 font-semibold hover:underline">Select All</button>
                                 <button onclick="selectAllBottleneckCheckboxes(false)" class="text-rose-400 font-semibold hover:underline">Clear All</button>
                             </div>
 
-                            <div id="bottleneck-checkbox-container" class="max-h-48 overflow-y-auto space-y-1.5 pr-1 text-xs text-slate-300 border-t border-slate-800/80 pt-2">
-                                <!-- Checkbox list items -->
-                            </div>
+                            <div id="bottleneck-checkbox-container" class="max-h-48 overflow-y-auto space-y-1.5 pr-1 text-xs text-slate-300 border-t border-slate-800/80 pt-2"></div>
                         </div>
                     </div>
 
                     <div class="flex items-center gap-2">
                         <span class="text-xs text-slate-400 font-medium">Sort By Rate:</span>
-                        <select id="site-sort-mode" onchange="renderSiteSsvTable()" class="bg-slate-900 text-xs font-semibold text-amber-400 border border-slate-700/80 rounded-xl px-3 py-1.5 outline-none focus:ring-2 focus:ring-amber-500 shadow-sm">
+                        <select id="site-sort-mode" onchange="renderSiteSsvTable()" class="bg-slate-900 text-xs font-semibold text-amber-400 border border-slate-700/80 rounded-xl px-3 py-1.5 outline-none">
                             <option value="DEFAULT">Default (Alphabetical)</option>
                             <option value="DESC">Highest Completion Rate</option>
                             <option value="ASC">Lowest Completion Rate</option>
@@ -423,17 +401,17 @@
                     </div>
 
                     <div class="flex items-center p-1 bg-slate-900 border border-slate-800 rounded-xl shadow-inner">
-                        <button id="toggle-site-col-unique" onclick="setSiteTableMetricMode('UNIQUE')" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-emerald-600 text-white transition flex items-center gap-1.5 shadow-sm">
+                        <button id="toggle-site-col-unique" onclick="setSiteTableMetricMode('UNIQUE')" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-emerald-600 text-white flex items-center gap-1.5 shadow-sm">
                             <i data-lucide="map-pin" class="w-3.5 h-3.5"></i> Unique Site View
                         </button>
-                        <button id="toggle-site-col-logical" onclick="setSiteTableMetricMode('LOGICAL')" class="px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-400 hover:text-white transition flex items-center gap-1.5">
+                        <button id="toggle-site-col-logical" onclick="setSiteTableMetricMode('LOGICAL')" class="px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-400 hover:text-white flex items-center gap-1.5">
                             <i data-lucide="layers" class="w-3.5 h-3.5"></i> Logical Site View
                         </button>
                     </div>
                 </div>
             </div>
 
-            <div class="flex items-center justify-between px-4 py-2.5 bg-slate-900/90 border border-slate-800 rounded-xl text-xs font-semibold text-slate-200 shadow-inner">
+            <div class="flex items-center justify-between px-4 py-2.5 bg-slate-900/90 border border-slate-800 rounded-xl text-xs font-semibold text-slate-200">
                 <span>100% Full Approval Rate: <strong id="site-ssv-pct" class="text-emerald-400 font-bold text-sm">0.0%</strong></span>
                 <span>Fully Approved Groupings: <strong id="site-ssv-approved-cnt" class="text-emerald-400 font-bold">0</strong> / <span id="site-ssv-total-cnt">0</span></span>
             </div>
@@ -441,9 +419,7 @@
             <div class="overflow-x-auto max-h-[450px] rounded-xl border border-slate-800">
                 <table id="site-ssv-table" class="w-full text-left text-xs text-slate-300">
                     <thead class="bg-slate-900/90 text-slate-400 sticky top-0 uppercase tracking-wider font-semibold border-b border-slate-800">
-                        <tr id="site-ssv-table-head">
-                            <!-- Dynamic Headings -->
-                        </tr>
+                        <tr id="site-ssv-table-head"></tr>
                     </thead>
                     <tbody id="site-ssv-table-body" class="divide-y divide-slate-800/60 bg-slate-950/40">
                         <tr><td colspan="8" class="p-6 text-center text-slate-500">Calculating unique site milestone readiness...</td></tr>
@@ -457,17 +433,16 @@
             <div class="flex flex-wrap items-center justify-between gap-4 border-b border-slate-800/80 pb-3">
                 <div>
                     <h2 class="font-bold text-base text-slate-100 flex items-center gap-2">
-                        <i data-lucide="clock" class="w-5 h-5 text-purple-400"></i>
-                        NOT YET TRFS AGING FROM SWAP / CUTOVER DATE
+                        <i data-lucide="clock" class="w-5 h-5 text-purple-400"></i> NOT YET TRFS AGING FROM SWAP / CUTOVER DATE
                     </h2>
                     <p class="text-xs text-slate-400">Elapsed time from Swap Date to Chart Snapshot Date for non-TRFS sites</p>
                 </div>
 
                 <div class="flex items-center p-1 bg-slate-900 border border-slate-800 rounded-xl shadow-inner">
-                    <button id="toggle-aging-logical" onclick="setAgingViewMode('LOGICAL')" class="px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-purple-600 text-white transition flex items-center gap-1.5 shadow-sm">
+                    <button id="toggle-aging-logical" onclick="setAgingViewMode('LOGICAL')" class="px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-purple-600 text-white flex items-center gap-1.5 shadow-sm">
                         <i data-lucide="layers" class="w-3.5 h-3.5"></i> Logical Sites
                     </button>
-                    <button id="toggle-aging-plaid" onclick="setAgingViewMode('PLAID')" class="px-3.5 py-1.5 rounded-lg text-xs font-semibold text-slate-400 hover:text-white transition flex items-center gap-1.5">
+                    <button id="toggle-aging-plaid" onclick="setAgingViewMode('PLAID')" class="px-3.5 py-1.5 rounded-lg text-xs font-semibold text-slate-400 hover:text-white flex items-center gap-1.5">
                         <i data-lucide="map-pin" class="w-3.5 h-3.5"></i> Physical Sites (Site Name)
                     </button>
                 </div>
@@ -502,8 +477,7 @@
                 <div class="flex flex-wrap items-center justify-between gap-3">
                     <div>
                         <h3 class="font-bold text-sm text-purple-300 flex items-center gap-2">
-                            <i data-lucide="table" class="w-4 h-4 text-purple-400"></i>
-                            Not Yet TRFS Aging - Aggregated Tabular Breakdown
+                            <i data-lucide="table" class="w-4 h-4 text-purple-400"></i> Not Yet TRFS Aging - Aggregated Tabular Breakdown
                         </h3>
                         <p class="text-[11px] text-slate-400">Granular aging bucket totals categorized per site, cluster, town, or province</p>
                     </div>
@@ -511,7 +485,7 @@
                     <div class="flex flex-wrap items-center gap-3">
                         <div class="flex items-center gap-2">
                             <span class="text-xs text-slate-400 font-medium">Group By:</span>
-                            <select id="aging-agg-group" onchange="onAgingAggGroupChange()" class="bg-slate-900 text-xs font-bold text-purple-300 border border-slate-700/80 rounded-xl px-3 py-1.5 outline-none focus:ring-2 focus:ring-purple-500 shadow-sm">
+                            <select id="aging-agg-group" onchange="onAgingAggGroupChange()" class="bg-slate-900 text-xs font-bold text-purple-300 border border-slate-700/80 rounded-xl px-3 py-1.5 outline-none">
                                 <option value="SITENAME">Physical Site Name</option>
                                 <option value="CLUSTER">Cluster Name</option>
                                 <option value="TOWN">Town / City</option>
@@ -519,9 +493,8 @@
                             </select>
                         </div>
 
-                        <!-- AGING DYNAMIC MULTI-SELECT CHECKBOX SEARCH DROPDOWN -->
                         <div class="relative inline-block text-left">
-                            <button onclick="toggleAgingSearchMenu()" class="bg-slate-900 text-xs font-semibold text-slate-200 border border-slate-700/80 rounded-xl px-3.5 py-1.5 flex items-center gap-2 shadow-sm hover:border-purple-500 transition">
+                            <button onclick="toggleAgingSearchMenu()" class="bg-slate-900 text-xs font-semibold text-slate-200 border border-slate-700/80 rounded-xl px-3.5 py-1.5 flex items-center gap-2 shadow-sm hover:border-purple-500">
                                 <i data-lucide="search" class="w-3.5 h-3.5 text-purple-400"></i>
                                 <span id="aging-filter-label">Filter Items (All Selected)</span>
                                 <i data-lucide="chevron-down" class="w-3.5 h-3.5 text-slate-400"></i>
@@ -538,16 +511,14 @@
                                     </select>
                                 </div>
 
-                                <input type="text" id="aging-search-input" oninput="filterAgingCheckboxList()" placeholder="Type to search items..." class="w-full bg-slate-950 text-xs text-slate-200 border border-slate-800 rounded-lg px-3 py-1.5 outline-none focus:ring-1 focus:ring-purple-500">
+                                <input type="text" id="aging-search-input" oninput="filterAgingCheckboxList()" placeholder="Type to search items..." class="w-full bg-slate-950 text-xs text-slate-200 border border-slate-800 rounded-lg px-3 py-1.5 outline-none">
 
                                 <div class="flex items-center justify-between text-[11px] pt-1 border-t border-slate-800">
                                     <button onclick="selectAllAgingCheckboxes(true)" class="text-purple-400 font-semibold hover:underline">Select All</button>
                                     <button onclick="selectAllAgingCheckboxes(false)" class="text-rose-400 font-semibold hover:underline">Clear All</button>
                                 </div>
 
-                                <div id="aging-checkbox-container" class="max-h-48 overflow-y-auto space-y-1.5 pr-1 text-xs text-slate-300 border-t border-slate-800/80 pt-2">
-                                    <!-- Checkbox list items -->
-                                </div>
+                                <div id="aging-checkbox-container" class="max-h-48 overflow-y-auto space-y-1.5 pr-1 text-xs text-slate-300 border-t border-slate-800/80 pt-2"></div>
                             </div>
                         </div>
                     </div>
@@ -556,9 +527,7 @@
                 <div class="overflow-x-auto max-h-[350px] rounded-xl border border-slate-800">
                     <table id="aging-breakdown-table" class="w-full text-left text-xs text-slate-300">
                         <thead class="bg-slate-900/90 text-slate-400 sticky top-0 uppercase tracking-wider font-semibold border-b border-slate-800">
-                            <tr id="aging-table-head">
-                                <!-- Dynamic Headings -->
-                            </tr>
+                            <tr id="aging-table-head"></tr>
                         </thead>
                         <tbody id="aging-table-body" class="divide-y divide-slate-800/60 bg-slate-950/40">
                             <tr><td colspan="7" class="p-6 text-center text-slate-500">Calculating non-TRFS aging breakdown...</td></tr>
@@ -568,28 +537,27 @@
             </div>
         </div>
 
-        <!-- BEAUTIFIED REJECTION REASONS & CLASSIFICATION -->
-        <div class="chart-card p-6 rounded-2xl space-y-5 border-l-4 border-l-rose-500 border border-slate-800/80 relative overflow-hidden shadow-2xl">
+        <!-- REJECTION REASONS & CLASSIFICATION -->
+        <div class="chart-card p-6 rounded-2xl space-y-5 border-l-4 border-l-rose-500 border border-slate-800/80">
             <div class="flex flex-wrap items-center justify-between gap-4 border-b border-slate-800/80 pb-4">
                 <div>
-                    <h2 class="font-bold text-lg text-rose-400 flex items-center gap-2 tracking-tight">
-                        <i data-lucide="alert-octagon" class="w-5 h-5 text-rose-500 animate-pulse"></i>
-                        Detailed Rejection Classification & Remarks
+                    <h2 class="font-bold text-lg text-rose-400 flex items-center gap-2">
+                        <i data-lucide="alert-octagon" class="w-5 h-5 text-rose-500 animate-pulse"></i> Detailed Rejection Classification & Remarks
                     </h2>
                     <p class="text-xs text-slate-400 mt-1 flex items-center gap-1.5">
                         <span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span>
-                        Filtered strictly by Approval Status Milestones: <span class="px-1.5 py-0.5 bg-red-500/20 text-red-300 font-semibold rounded text-[11px] border border-red-500/30">Rejected</span> and <span class="px-1.5 py-0.5 bg-amber-500/20 text-amber-300 font-semibold rounded text-[11px] border border-amber-500/30">Re-submit</span>
+                        Filtered strictly by Approval Status Milestones: <span class="px-1.5 py-0.5 bg-red-500/20 text-red-300 font-semibold rounded text-[11px]">Rejected</span> and <span class="px-1.5 py-0.5 bg-amber-500/20 text-amber-300 font-semibold rounded text-[11px]">Re-submit</span>
                     </p>
                 </div>
 
                 <div class="flex flex-wrap items-center gap-3">
                     <div class="text-xs font-semibold px-3 py-1.5 bg-slate-900/90 text-slate-300 border border-slate-800 rounded-xl flex items-center gap-2 shadow-inner">
                         <span class="text-slate-400">Milestone Split:</span>
-                        <span class="px-2 py-0.5 bg-red-500/15 text-red-400 rounded-lg border border-red-500/30">Rejected: <strong id="rej-ms-rejected-cnt" class="text-white">0</strong></span>
-                        <span class="px-2 py-0.5 bg-amber-500/15 text-amber-400 rounded-lg border border-amber-500/30">Re-submit: <strong id="rej-ms-resubmit-cnt" class="text-white">0</strong></span>
+                        <span class="px-2 py-0.5 bg-red-500/15 text-red-400 rounded-lg">Rejected: <strong id="rej-ms-rejected-cnt" class="text-white">0</strong></span>
+                        <span class="px-2 py-0.5 bg-amber-500/15 text-amber-400 rounded-lg">Re-submit: <strong id="rej-ms-resubmit-cnt" class="text-white">0</strong></span>
                     </div>
 
-                    <div class="text-xs font-bold px-3.5 py-1.5 bg-gradient-to-r from-rose-900/40 to-red-900/40 text-rose-300 border border-rose-500/30 rounded-xl flex items-center gap-2 shadow-sm">
+                    <div class="text-xs font-bold px-3.5 py-1.5 bg-gradient-to-r from-rose-900/40 to-red-900/40 text-rose-300 border border-rose-500/30 rounded-xl flex items-center gap-2">
                         <i data-lucide="layers" class="w-4 h-4 text-rose-400"></i>
                         <span>Total Deficiencies:</span>
                         <strong id="rej-kpi-total-reasons" class="text-white text-base">0</strong>
@@ -599,59 +567,58 @@
 
             <!-- REJECTION CATEGORY KPI CARDS GRID -->
             <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3">
-                <div id="rej-card-c1" class="bg-slate-900/90 p-3.5 rounded-xl border border-slate-800 hover:border-rose-500/40 transition-all flex flex-col justify-between">
+                <div id="rej-card-c1" class="bg-slate-900/90 p-3.5 rounded-xl border border-slate-800 flex flex-col justify-between">
                     <div>
-                        <span class="text-[10px] text-slate-400 font-semibold uppercase leading-tight tracking-wider block">1. Doc & Quality</span>
+                        <span class="text-[10px] text-slate-400 font-semibold uppercase block">1. Doc & Quality</span>
                         <div id="rej-kpi-c1" class="text-2xl font-black text-rose-400 mt-1">0</div>
                     </div>
                     <div id="rej-kpi-c1-pct" class="text-[10px] text-rose-300/80 font-medium mt-2 pt-1 border-t border-slate-800/80">0.0% of total</div>
                 </div>
 
-                <div id="rej-card-c2" class="bg-slate-900/90 p-3.5 rounded-xl border border-slate-800 hover:border-rose-500/40 transition-all flex flex-col justify-between">
+                <div id="rej-card-c2" class="bg-slate-900/90 p-3.5 rounded-xl border border-slate-800 flex flex-col justify-between">
                     <div>
-                        <span class="text-[10px] text-slate-400 font-semibold uppercase leading-tight tracking-wider block">2. Data & Mismatch</span>
+                        <span class="text-[10px] text-slate-400 font-semibold uppercase block">2. Data & Mismatch</span>
                         <div id="rej-kpi-c2" class="text-2xl font-black text-rose-400 mt-1">0</div>
                     </div>
                     <div id="rej-kpi-c2-pct" class="text-[10px] text-rose-300/80 font-medium mt-2 pt-1 border-t border-slate-800/80">0.0% of total</div>
                 </div>
 
-                <div id="rej-card-c3" class="bg-slate-900/90 p-3.5 rounded-xl border border-slate-800 hover:border-rose-500/40 transition-all flex flex-col justify-between">
+                <div id="rej-card-c3" class="bg-slate-900/90 p-3.5 rounded-xl border border-slate-800 flex flex-col justify-between">
                     <div>
-                        <span class="text-[10px] text-slate-400 font-semibold uppercase leading-tight tracking-wider block">3. Optimization</span>
+                        <span class="text-[10px] text-slate-400 font-semibold uppercase block">3. Optimization</span>
                         <div id="rej-kpi-c3" class="text-2xl font-black text-rose-400 mt-1">0</div>
                     </div>
                     <div id="rej-kpi-c3-pct" class="text-[10px] text-rose-300/80 font-medium mt-2 pt-1 border-t border-slate-800/80">0.0% of total</div>
                 </div>
 
-                <div id="rej-card-c4" class="bg-slate-900/90 p-3.5 rounded-xl border border-slate-800 hover:border-rose-500/40 transition-all flex flex-col justify-between">
+                <div id="rej-card-c4" class="bg-slate-900/90 p-3.5 rounded-xl border border-slate-800 flex flex-col justify-between">
                     <div>
-                        <span class="text-[10px] text-slate-400 font-semibold uppercase leading-tight tracking-wider block">4. KPI Validation</span>
+                        <span class="text-[10px] text-slate-400 font-semibold uppercase block">4. KPI Validation</span>
                         <div id="rej-kpi-c4" class="text-2xl font-black text-rose-400 mt-1">0</div>
                     </div>
                     <div id="rej-kpi-c4-pct" class="text-[10px] text-rose-300/80 font-medium mt-2 pt-1 border-t border-slate-800/80">0.0% of total</div>
                 </div>
 
-                <div id="rej-card-c5" class="bg-slate-900/90 p-3.5 rounded-xl border border-slate-800 hover:border-rose-500/40 transition-all flex flex-col justify-between">
+                <div id="rej-card-c5" class="bg-slate-900/90 p-3.5 rounded-xl border border-slate-800 flex flex-col justify-between">
                     <div>
-                        <span class="text-[10px] text-slate-400 font-semibold uppercase leading-tight tracking-wider block">5. Retest Required</span>
+                        <span class="text-[10px] text-slate-400 font-semibold uppercase block">5. Retest Required</span>
                         <div id="rej-kpi-c5" class="text-2xl font-black text-rose-400 mt-1">0</div>
                     </div>
                     <div id="rej-kpi-c5-pct" class="text-[10px] text-rose-300/80 font-medium mt-2 pt-1 border-t border-slate-800/80">0.0% of total</div>
                 </div>
 
-                <div id="rej-card-c6" class="bg-slate-900/90 p-3.5 rounded-xl border border-slate-800 hover:border-rose-500/40 transition-all flex flex-col justify-between">
+                <div id="rej-card-c6" class="bg-slate-900/90 p-3.5 rounded-xl border border-slate-800 flex flex-col justify-between">
                     <div>
-                        <span class="text-[10px] text-slate-400 font-semibold uppercase leading-tight tracking-wider block">6. Site Corrections</span>
+                        <span class="text-[10px] text-slate-400 font-semibold uppercase block">6. Site Corrections</span>
                         <div id="rej-kpi-c6" class="text-2xl font-black text-rose-400 mt-1">0</div>
                     </div>
                     <div id="rej-kpi-c6-pct" class="text-[10px] text-rose-300/80 font-medium mt-2 pt-1 border-t border-slate-800/80">0.0% of total</div>
                 </div>
 
-                <!-- DEDICATED KPI CARD FOR BLANK / UNTAGGED -->
                 <div id="rej-card-blank" class="bg-slate-900/90 p-3.5 rounded-xl border border-amber-500/30 border-l-4 border-l-amber-500 flex flex-col justify-between">
                     <div>
-                        <span class="text-[10px] text-amber-400 font-semibold uppercase leading-tight flex items-center gap-1 tracking-wider block">
-                            <i data-lucide="help-circle" class="w-3 h-3 text-amber-400"></i> Untagged (Blank)
+                        <span class="text-[10px] text-amber-400 font-semibold uppercase flex items-center gap-1 block">
+                            <i data-lucide="help-circle" class="w-3 h-3"></i> Untagged (Blank)
                         </span>
                         <div id="rej-kpi-blank" class="text-2xl font-black text-amber-400 mt-1">0</div>
                     </div>
@@ -659,8 +626,8 @@
                 </div>
             </div>
 
-            <!-- DETAILED TABLE WITH PROGRESS BARS -->
-            <div class="overflow-x-auto rounded-xl border border-slate-800/80 shadow-lg">
+            <!-- TABLE WITH PROGRESS BARS -->
+            <div class="overflow-x-auto rounded-xl border border-slate-800/80">
                 <table class="w-full text-left text-xs text-slate-300 border-collapse">
                     <thead class="bg-slate-900/90 text-slate-400 uppercase tracking-wider font-semibold border-b border-slate-800">
                         <tr>
@@ -780,8 +747,7 @@
             <div class="flex flex-wrap items-center justify-between gap-4 border-b border-slate-800/80 pb-3">
                 <div>
                     <h2 class="font-bold text-base text-slate-100 flex items-center gap-2">
-                        <i data-lucide="database" class="w-5 h-5 text-indigo-400"></i>
-                        Logical Site Milestone Master Records
+                        <i data-lucide="database" class="w-5 h-5 text-indigo-400"></i> Logical Site Milestone Master Records
                     </h2>
                     <p class="text-xs text-slate-400">Granular record details with instant technology and milestone search filtering</p>
                 </div>
@@ -826,7 +792,7 @@
                 <div class="flex flex-wrap items-center gap-3">
                     <div class="flex items-center gap-2">
                         <span class="text-xs text-slate-400 font-medium">Technology:</span>
-                        <select id="tech-filter" onchange="renderMasterTable()" class="bg-slate-950 text-xs font-semibold text-blue-400 border border-slate-700/80 rounded-xl px-2.5 py-1.5 outline-none focus:ring-2 focus:ring-blue-500 shadow-sm">
+                        <select id="tech-filter" onchange="renderMasterTable()" class="bg-slate-950 text-xs font-semibold text-blue-400 border border-slate-700/80 rounded-xl px-2.5 py-1.5 outline-none">
                             <option value="ALL">All Technologies</option>
                             <option value="2G">2G</option>
                             <option value="LTE">LTE / 4G</option>
@@ -836,9 +802,10 @@
 
                     <div class="flex items-center gap-2">
                         <span class="text-xs text-slate-400 font-medium">Milestone Filter:</span>
-                        <select id="master-milestone-filter" onchange="renderMasterTable()" class="bg-slate-950 text-xs text-slate-200 border border-slate-700/80 rounded-xl px-2.5 py-1.5 outline-none focus:ring-2 focus:ring-blue-500 shadow-sm">
+                        <select id="master-milestone-filter" onchange="renderMasterTable()" class="bg-slate-950 text-xs text-slate-200 border border-slate-700/80 rounded-xl px-2.5 py-1.5 outline-none">
                             <option value="ALL">All Milestones</option>
                             <option value="SSV APPROVED">SSV Approved</option>
+                            <option value="PARTIALLY APPROVED">Partially Approved</option>
                             <option value="FOR GT REVIEW">For GT Review</option>
                             <option value="REJECTED">Rejected / Revision</option>
                             <option value="ONGOING SSV">Ongoing SSV</option>
@@ -848,7 +815,7 @@
                 </div>
 
                 <div class="w-full sm:w-auto flex items-center gap-2">
-                    <input type="text" id="master-search" oninput="debouncedSearchMasterTable()" placeholder="Search site name, PLAID, or lookup key..." class="bg-slate-950 border border-slate-700/80 text-xs rounded-xl px-3 py-1.5 text-slate-200 outline-none focus:ring-2 focus:ring-blue-500 w-full sm:w-64 shadow-sm">
+                    <input type="text" id="master-search" oninput="debouncedSearchMasterTable()" placeholder="Search site name, PLAID, or lookup key..." class="bg-slate-950 border border-slate-700/80 text-xs rounded-xl px-3 py-1.5 text-slate-200 outline-none w-full sm:w-64">
                 </div>
             </div>
 
@@ -893,11 +860,9 @@
         let masterPage = 1;
         const PAGE_SIZE = 50;
 
-        // BOTTLE-NECK MULTI-SELECT CHECKBOX STATE
         let bottleneckSelectedValues = new Set();
         let bottleneckSearchMenuOpen = false;
 
-        // AGING MULTI-SELECT CHECKBOX STATE
         let agingSelectedValues = new Set();
         let agingSearchMenuOpen = false;
 
@@ -908,7 +873,6 @@
                 }
             } catch (e) {}
 
-            // Close checkbox dropdowns when clicking outside
             document.addEventListener('click', (e) => {
                 const bottleneckMenu = document.getElementById('bottleneck-search-menu');
                 const bottleneckBtn = e.target.closest('button[onclick="toggleBottleneckSearchMenu()"]');
@@ -1162,7 +1126,11 @@
                 let isResubmit = false;
 
                 if (statusUpper.includes('APPROVED') || statusUpper.includes('PASSED')) {
-                    milestone = 'SSV APPROVED';
+                    if (statusUpper.includes('PARTIAL')) {
+                        milestone = 'PARTIALLY APPROVED';
+                    } else {
+                        milestone = 'SSV APPROVED';
+                    }
                     if (!approvedDateObj) {
                         approvedDateObj = trfsDateObj || swapDateObj;
                         if (approvedDateObj) approvedDateObj.setHours(0, 0, 0, 0);
@@ -1174,7 +1142,7 @@
                     } else {
                         isForReview = true;
                     }
-                } else if (statusUpper.includes('REJECT') || statusUpper.includes('REVISION')) {
+                } else if (statusUpper.includes('REJECT') || statusUpper.includes('REVIS')) {
                     milestone = 'REJECTED';
                 } else if (statusUpper.includes('ONGOING')) {
                     milestone = 'ONGOING SSV';
@@ -1216,7 +1184,6 @@
             applyFilters();
         }
 
-        /* MULTI-SELECT CHECKBOX SEARCH DROPDOWN LOGIC FOR BOTTLENECK TABLE */
         function toggleBottleneckSearchMenu() {
             const menu = document.getElementById('bottleneck-search-menu');
             if (menu) {
@@ -1323,7 +1290,6 @@
             }
         }
 
-        /* MULTI-SELECT CHECKBOX SEARCH DROPDOWN LOGIC FOR AGING TABULAR BREAKDOWN */
         function toggleAgingSearchMenu() {
             const menu = document.getElementById('aging-search-menu');
             if (menu) {
@@ -1356,7 +1322,7 @@
 
                 Object.values(siteMap).forEach(items => {
                     const status = getPlaidStatus(items);
-                    if (status === 'NOT YET TRFS') {
+                    if (status === 'NOT YET TRFS' || status === 'ONGOING SSV WITHIN SLA' || status === 'ONGOING SSV BEYOND SLA') {
                         let bestRep = items[0];
                         items.forEach(d => {
                             if (d.SwapDate && (!bestRep.SwapDate || d.SwapDate < bestRep.SwapDate)) {
@@ -1459,7 +1425,6 @@
             const allFilteredData = getFilteredDataset();
             let nonTrfsItems = [];
 
-            // SYNCHRONIZED CALCULATION WITH GRAPH TOGGLE MODE
             if (agingViewMode === 'LOGICAL') {
                 nonTrfsItems = allFilteredData.filter(d => d.Milestone === 'NOT YET TRFS');
             } else {
@@ -1472,7 +1437,7 @@
 
                 Object.values(siteMap).forEach(items => {
                     const status = getPlaidStatus(items);
-                    if (status === 'NOT YET TRFS') {
+                    if (status === 'NOT YET TRFS' || status === 'ONGOING SSV WITHIN SLA' || status === 'ONGOING SSV BEYOND SLA') {
                         let bestRep = items[0];
                         items.forEach(d => {
                             if (d.SwapDate && (!bestRep.SwapDate || d.SwapDate < bestRep.SwapDate)) {
@@ -1486,7 +1451,6 @@
 
             const searchField = document.getElementById('aging-search-field').value;
 
-            // Apply dynamic checkbox filtering
             if (agingSelectedValues.size > 0) {
                 nonTrfsItems = nonTrfsItems.filter(d => {
                     let val = d.SiteName;
@@ -1590,7 +1554,6 @@
         }
 
         function getLogicalSiteStatusOnDate(d, dt) {
-            // 1. Strict Check: If the site is explicitly flagged 'NOT YET TRFS' in master data, keep it 'NOT YET TRFS'
             if (d.Milestone === 'NOT YET TRFS') {
                 return 'NOT YET TRFS';
             }
@@ -1598,7 +1561,6 @@
             const evalDt = new Date(dt);
             evalDt.setHours(0, 0, 0, 0);
 
-            // 2. Check TRFS threshold
             const trfsDt = d.TrfsDate ? new Date(d.TrfsDate) : null;
             if (trfsDt) trfsDt.setHours(0, 0, 0, 0);
 
@@ -1606,7 +1568,6 @@
                 return 'NOT YET TRFS';
             }
 
-            // 3. Reconstruct timeline events STRICTLY based on event dates up to evalDt
             const events = [];
             events.push({ date: trfsDt, status: 'ONGOING SSV', order: 1 });
 
@@ -1625,9 +1586,8 @@
             checkAndPush(d.Submit2Date, 'FOR GT REVIEW', 4);
             checkAndPush(d.Reject2Date, 'REJECTED', 5);
             checkAndPush(d.Submit3Date, 'FOR GT REVIEW', 6);
-            checkAndPush(d.ApprovedDate, 'SSV APPROVED', 7);
+            checkAndPush(d.ApprovedDate, d.Milestone === 'PARTIALLY APPROVED' ? 'PARTIALLY APPROVED' : 'SSV APPROVED', 7);
 
-            // Sort matched events by date then priority order
             events.sort((a, b) => {
                 if (a.date.getTime() !== b.date.getTime()) {
                     return a.date.getTime() - b.date.getTime();
@@ -1635,10 +1595,12 @@
                 return a.order - b.order;
             });
 
-            // Return the milestone corresponding to the most recent event on/before evalDt
             return events[events.length - 1].status;
         }
 
+        // ==============================================================================
+        // FIXED PHYSICAL SITE MILESTONE EVALUATION (PLAID / UNIQUE SITE LEVEL)
+        // ==============================================================================
         function getPlaidStatus(items, dt = null) {
             let validItems = items;
             if (dt) {
@@ -1652,50 +1614,79 @@
 
             const now = dt ? new Date(dt) : new Date();
             now.setHours(0, 0, 0, 0);
+
             const statuses = validItems.map(d => d.EvaluatedMilestone);
 
-            if (statuses.length > 0 && statuses.every(s => s === 'SSV APPROVED')) {
-                return 'SSV APPROVED';
-            }
-
-            if (statuses.includes('NOT YET TRFS')) {
+            // 1. If ALL logical entries are NOT YET TRFS, the physical site is NOT YET TRFS
+            if (statuses.every(s => s === 'NOT YET TRFS')) {
                 return 'NOT YET TRFS';
             }
 
-            if (statuses.includes('ONGOING SSV')) {
+            // 2. Check for active unsubmitted / pending TRFS entries
+            const unsubmitted = validItems.filter(d => 
+                d.EvaluatedMilestone === 'NOT YET TRFS' || d.EvaluatedMilestone === 'ONGOING SSV'
+            );
+
+            if (unsubmitted.length > 0) {
+                // Check if any of these entries have a valid TRFS Date to compute SLA aging
+                const trfsEntries = validItems.filter(d => d.TrfsDate !== null && d.TrfsDate !== undefined);
+
+                if (trfsEntries.length === 0) {
+                    return 'NOT YET TRFS';
+                }
+
                 let maxDays = 0;
-                validItems.filter(d => d.EvaluatedMilestone === 'ONGOING SSV').forEach(d => {
-                    const refDt = d.TrfsDate;
-                    if (refDt) {
-                        const refNorm = new Date(refDt);
-                        refNorm.setHours(0, 0, 0, 0);
-                        const days = Math.floor((now - refNorm) / (1000 * 60 * 60 * 24));
-                        if (days > maxDays) maxDays = days;
-                    }
+                trfsEntries.forEach(d => {
+                    const refNorm = new Date(d.TrfsDate);
+                    refNorm.setHours(0, 0, 0, 0);
+                    const days = Math.floor((now - refNorm) / (1000 * 60 * 60 * 24));
+                    if (days > maxDays) maxDays = days;
                 });
-                return maxDays > 21 ? 'ONGOING BEYOND SLA' : 'ONGOING WITHIN SLA';
+
+                return maxDays > 21 ? 'ONGOING SSV BEYOND SLA' : 'ONGOING SSV WITHIN SLA';
             }
 
-            if (statuses.includes('REJECTED')) {
+            // 3. All technologies submitted: Evaluate fully approved / partially approved
+            if (statuses.every(s => s === 'SSV APPROVED')) {
+                return 'SSV APPROVED';
+            }
+
+            const isAllApprovedOrPartial = statuses.every(s => s === 'SSV APPROVED' || s === 'PARTIALLY APPROVED');
+            if (isAllApprovedOrPartial && statuses.includes('PARTIALLY APPROVED')) {
+                return 'PARTIALLY APPROVED';
+            }
+
+            // 4. Highest Count Rule between Rejected vs. For GT Review
+            let countRejected = 0;
+            let countGTReview = 0;
+
+            statuses.forEach(s => {
+                if (s === 'REJECTED') countRejected++;
+                if (s === 'FOR GT REVIEW') countGTReview++;
+            });
+
+            if (countRejected > countGTReview) {
                 return 'REJECTED';
-            }
-
-            if (statuses.includes('FOR GT REVIEW')) {
+            } else if (countGTReview > countRejected) {
+                return 'FOR GT REVIEW';
+            } else if (countRejected > 0) {
+                return 'REJECTED';
+            } else if (countGTReview > 0) {
                 return 'FOR GT REVIEW';
             }
 
-            return 'NOT YET TRFS';
+            return 'ONGOING SSV WITHIN SLA';
         }
 
         function setSiteTableMetricMode(mode) {
             siteTableMetricMode = mode;
             document.getElementById('toggle-site-col-unique').className = mode === 'UNIQUE'
-                ? 'px-3 py-1.5 rounded-lg text-xs font-semibold bg-emerald-600 text-white transition flex items-center gap-1.5 shadow-sm'
-                : 'px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-400 hover:text-white transition flex items-center gap-1.5';
+                ? 'px-3 py-1.5 rounded-lg text-xs font-semibold bg-emerald-600 text-white flex items-center gap-1.5 shadow-sm'
+                : 'px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-400 hover:text-white flex items-center gap-1.5';
 
             document.getElementById('toggle-site-col-logical').className = mode === 'LOGICAL'
-                ? 'px-3 py-1.5 rounded-lg text-xs font-semibold bg-emerald-600 text-white transition flex items-center gap-1.5 shadow-sm'
-                : 'px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-400 hover:text-white transition flex items-center gap-1.5';
+                ? 'px-3 py-1.5 rounded-lg text-xs font-semibold bg-emerald-600 text-white flex items-center gap-1.5 shadow-sm'
+                : 'px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-400 hover:text-white flex items-center gap-1.5';
 
             renderSiteSsvTable();
         }
@@ -1704,7 +1695,6 @@
             let data = getFilteredDataset();
             const searchField = document.getElementById('bottleneck-search-field').value;
 
-            // APPLY BOTTLE-NECK MULTI-SELECT CHECKBOX FILTER
             if (bottleneckSelectedValues.size > 0) {
                 data = data.filter(d => {
                     let val = d.SiteName;
@@ -1889,7 +1879,6 @@
             document.getElementById('category-filter').innerHTML = categories.map(c => `<option value="${c}">${c === 'ALL' ? 'All Categories' : c}</option>`).join('');
             document.getElementById('vendor-filter').innerHTML = vendors.map(v => `<option value="${v}">${v === 'ALL' ? 'All Vendors' : v}</option>`).join('');
 
-            // POPULATE PROVINCE DROPDOWN AND FORCE DEFAULT SELECTION TO ALL PROVINCES
             const provSelect = document.getElementById('province-filter');
             provSelect.innerHTML = provinces.map(p => `<option value="${p}">${p === 'ALL' ? 'All Provinces' : p}</option>`).join('');
             provSelect.value = 'ALL';
@@ -1915,12 +1904,12 @@
         function setProgressViewMode(mode) {
             progressViewMode = mode;
             document.getElementById('toggle-progress-logical').className = mode === 'LOGICAL' 
-                ? 'px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-blue-600 text-white transition flex items-center gap-1.5 shadow-sm'
-                : 'px-3.5 py-1.5 rounded-lg text-xs font-semibold text-slate-400 hover:text-white transition flex items-center gap-1.5';
+                ? 'px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-blue-600 text-white flex items-center gap-1.5 shadow-sm'
+                : 'px-3.5 py-1.5 rounded-lg text-xs font-semibold text-slate-400 hover:text-white flex items-center gap-1.5';
 
             document.getElementById('toggle-progress-plaid').className = mode === 'PLAID'
-                ? 'px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-blue-600 text-white transition flex items-center gap-1.5 shadow-sm'
-                : 'px-3.5 py-1.5 rounded-lg text-xs font-semibold text-slate-400 hover:text-white transition flex items-center gap-1.5';
+                ? 'px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-blue-600 text-white flex items-center gap-1.5 shadow-sm'
+                : 'px-3.5 py-1.5 rounded-lg text-xs font-semibold text-slate-400 hover:text-white flex items-center gap-1.5';
 
             updateKPIs();
             renderTrendChart();
@@ -1929,12 +1918,12 @@
         function setAgingViewMode(mode) {
             agingViewMode = mode;
             document.getElementById('toggle-aging-logical').className = mode === 'LOGICAL' 
-                ? 'px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-purple-600 text-white transition flex items-center gap-1.5 shadow-sm'
-                : 'px-3.5 py-1.5 rounded-lg text-xs font-semibold text-slate-400 hover:text-white transition flex items-center gap-1.5';
+                ? 'px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-purple-600 text-white flex items-center gap-1.5 shadow-sm'
+                : 'px-3.5 py-1.5 rounded-lg text-xs font-semibold text-slate-400 hover:text-white flex items-center gap-1.5';
 
             document.getElementById('toggle-aging-plaid').className = mode === 'PLAID'
-                ? 'px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-purple-600 text-white transition flex items-center gap-1.5 shadow-sm'
-                : 'px-3.5 py-1.5 rounded-lg text-xs font-semibold text-slate-400 hover:text-white transition flex items-center gap-1.5';
+                ? 'px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-purple-600 text-white flex items-center gap-1.5 shadow-sm'
+                : 'px-3.5 py-1.5 rounded-lg text-xs font-semibold text-slate-400 hover:text-white flex items-center gap-1.5';
 
             updateKPIs();
             renderAgingChart();
@@ -2099,19 +2088,23 @@
             setBarWidth('bar-c6', c6);
         }
 
+        // ==============================================================================
+        // FIXED ACCURATE KPI SUMMARY UPDATES
+        // ==============================================================================
         function updateKPIs() {
             const data = getFilteredDataset();
             const now = new Date();
-            now.setHours(0, 0, 0, 0); // Normalized start of current day
+            now.setHours(0, 0, 0, 0);
 
             let totalSites = 0;
-            let approved = 0, forReview = 0, resubmit = 0, rejected = 0;
+            let approved = 0, partiallyApproved = 0, forReview = 0, resubmit = 0, rejected = 0;
             let ongoingWithin = 0, ongoingBeyond = 0, notTrfs = 0;
 
             if (progressViewMode === 'LOGICAL') {
                 totalSites = data.length;
                 data.forEach(d => {
                     if (d.Milestone === 'SSV APPROVED') approved++;
+                    else if (d.Milestone === 'PARTIALLY APPROVED') partiallyApproved++;
                     else if (d.Milestone === 'REJECTED') rejected++;
                     else if (d.Milestone === 'FOR GT REVIEW') {
                         if (d.IsResubmit) resubmit++;
@@ -2145,9 +2138,10 @@
                     const status = getPlaidStatus(items, now);
 
                     if (status === 'SSV APPROVED') approved++;
+                    else if (status === 'PARTIALLY APPROVED') partiallyApproved++;
                     else if (status === 'NOT YET TRFS') notTrfs++;
-                    else if (status === 'ONGOING BEYOND SLA') ongoingBeyond++;
-                    else if (status === 'ONGOING WITHIN SLA') ongoingWithin++;
+                    else if (status === 'ONGOING SSV BEYOND SLA') ongoingBeyond++;
+                    else if (status === 'ONGOING SSV WITHIN SLA') ongoingWithin++;
                     else if (status === 'REJECTED') rejected++;
                     else if (status === 'FOR GT REVIEW') {
                         const hasResubmit = items.some(d => d.Milestone === 'FOR GT REVIEW' && d.IsResubmit);
@@ -2161,10 +2155,14 @@
             }
 
             const pctApproved = totalSites > 0 ? ((approved / totalSites) * 100).toFixed(1) : '0.0';
+            const pctPartiallyApproved = totalSites > 0 ? ((partiallyApproved / totalSites) * 100).toFixed(1) : '0.0';
+            const pctNotTrfs = totalSites > 0 ? ((notTrfs / totalSites) * 100).toFixed(1) : '0.0';
 
             document.getElementById('kpi-total').innerText = totalSites.toLocaleString();
             document.getElementById('kpi-approved').innerText = approved.toLocaleString();
             document.getElementById('kpi-approved-pct').innerText = `${pctApproved}% of total`;
+            document.getElementById('kpi-partially-approved').innerText = partiallyApproved.toLocaleString();
+            document.getElementById('kpi-partially-approved-pct').innerText = `${pctPartiallyApproved}% of total`;
             document.getElementById('kpi-rejected').innerText = rejected.toLocaleString();
             document.getElementById('kpi-review').innerText = (forReview + resubmit).toLocaleString();
             document.getElementById('kpi-for-review-sub').innerText = forReview.toLocaleString();
@@ -2172,6 +2170,7 @@
             document.getElementById('kpi-ongoing-beyond').innerText = ongoingBeyond.toLocaleString();
             document.getElementById('kpi-ongoing-within').innerText = ongoingWithin.toLocaleString();
             document.getElementById('kpi-not-trfs').innerText = notTrfs.toLocaleString();
+            document.getElementById('kpi-not-trfs-pct').innerText = `${pctNotTrfs}% of total`;
 
             let nonTrfsItems = [];
             if (agingViewMode === 'LOGICAL') {
@@ -2320,6 +2319,7 @@
 
             const traces = [
                 { name: 'SSV APPROVED', type: 'bar', marker: { color: '#10b981' }, x: [], y: [] },
+                { name: 'PARTIALLY APPROVED', type: 'bar', marker: { color: '#14b8a6' }, x: [], y: [] },
                 { name: 'REJECTED / REVISION', type: 'bar', marker: { color: '#ef4444' }, x: [], y: [] },
                 { name: 'FOR GT REVIEW', type: 'bar', marker: { color: '#3b82f6' }, x: [], y: [] },
                 { name: 'ONGOING BEYOND SLA', type: 'bar', marker: { color: '#ea580c' }, x: [], y: [] },
@@ -2328,9 +2328,9 @@
 
             aggItems.forEach(item => {
                 const dt = new Date(item.date);
-                dt.setHours(0, 0, 0, 0); // Normalized start of day
+                dt.setHours(0, 0, 0, 0);
                 const label = item.label;
-                let app = 0, rej = 0, rev = 0, ongBeyond = 0, ongWithin = 0;
+                let app = 0, partApp = 0, rej = 0, rev = 0, ongBeyond = 0, ongWithin = 0;
 
                 if (progressViewMode === 'LOGICAL') {
                     data.forEach(d => {
@@ -2338,6 +2338,7 @@
                         if (statusOnDt === 'NOT YET TRFS') return;
 
                         if (statusOnDt === 'SSV APPROVED') app++;
+                        else if (statusOnDt === 'PARTIALLY APPROVED') partApp++;
                         else if (statusOnDt === 'REJECTED') rej++;
                         else if (statusOnDt === 'FOR GT REVIEW') rev++;
                         else if (statusOnDt === 'ONGOING SSV') {
@@ -2362,21 +2363,24 @@
 
                     Object.values(siteMap).forEach(items => {
                         const statusOnDt = getPlaidStatus(items, dt);
-                        if (statusOnDt === 'NOT YET TRFS') return;
+
+                        if (statusOnDt === 'NOT YET TRFS') return; // Exclude non-TRFS physical site from progress bars
 
                         if (statusOnDt === 'SSV APPROVED') app++;
+                        else if (statusOnDt === 'PARTIALLY APPROVED') partApp++;
                         else if (statusOnDt === 'REJECTED') rej++;
                         else if (statusOnDt === 'FOR GT REVIEW') rev++;
-                        else if (statusOnDt === 'ONGOING BEYOND SLA') ongBeyond++;
-                        else if (statusOnDt === 'ONGOING WITHIN SLA') ongWithin++;
+                        else if (statusOnDt === 'ONGOING SSV BEYOND SLA') ongBeyond++;
+                        else if (statusOnDt === 'ONGOING SSV WITHIN SLA') ongWithin++;
                     });
                 }
 
                 traces[0].x.push(label); traces[0].y.push(app);
-                traces[1].x.push(label); traces[1].y.push(rej);
-                traces[2].x.push(label); traces[2].y.push(rev);
-                traces[3].x.push(label); traces[3].y.push(ongBeyond);
-                traces[4].x.push(label); traces[4].y.push(ongWithin);
+                traces[1].x.push(label); traces[1].y.push(partApp);
+                traces[2].x.push(label); traces[2].y.push(rej);
+                traces[3].x.push(label); traces[3].y.push(rev);
+                traces[4].x.push(label); traces[4].y.push(ongBeyond);
+                traces[5].x.push(label); traces[5].y.push(ongWithin);
             });
 
             const layout = {
@@ -2558,6 +2562,7 @@
 
                 let badge = 'bg-slate-800 text-slate-300';
                 if (r.Milestone === 'SSV APPROVED') badge = 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30';
+                else if (r.Milestone === 'PARTIALLY APPROVED') badge = 'bg-teal-500/20 text-teal-400 border border-teal-500/30';
                 else if (r.Milestone === 'FOR GT REVIEW') badge = 'bg-blue-500/20 text-blue-400 border border-blue-500/30';
                 else if (r.Milestone === 'REJECTED') badge = 'bg-red-500/20 text-red-400 border border-red-500/30';
                 else if (r.Milestone === 'ONGOING SSV') badge = 'bg-amber-500/20 text-amber-400 border border-amber-500/30';
